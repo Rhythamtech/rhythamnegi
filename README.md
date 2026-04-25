@@ -44,7 +44,7 @@ This website is built using **Astro**, a modern web framework for building fast,
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18.0.0 or higher)
+- [Node.js](https://nodejs.org/) (v18.20.8 or higher)
 - [npm](https://www.npmjs.com/) or [pnpm](https://pnpm.io/)
 
 ### Installation
