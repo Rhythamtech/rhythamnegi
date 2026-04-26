@@ -17,10 +17,16 @@ function buildToc(headings: Heading[]) {
   headings.forEach((h) => {
     const heading = { ...h, subheadings: [] };
     parentHeadings.set(heading.depth, heading);
-    if (heading.depth === 2) {
+    if (heading.depth === 2 || heading.depth === 1) {
       toc.push(heading);
     } else {
-      parentHeadings.get(heading.depth - 1).subheadings.push(heading);
+      const parent = parentHeadings.get(heading.depth - 1);
+      if (parent) {
+        parent.subheadings.push(heading);
+      } else {
+        // Fallback: if parent doesn't exist, treat as top-level or ignore
+        toc.push(heading);
+      }
     }
   });
   return toc;

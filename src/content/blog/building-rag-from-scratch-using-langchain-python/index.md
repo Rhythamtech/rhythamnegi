@@ -159,9 +159,9 @@ Problems you’ll encounter:
 That’s why advanced RAG techniques exist.
 
 
-# Advanced RAG Techniques (That Actually Matter)
+## Advanced RAG Techniques (That Actually Matter)
 
-## 1. Multi-Query Retrieval
+### 1. Multi-Query Retrieval
 
 Instead of relying on one query, generate multiple variations.
 
@@ -191,7 +191,7 @@ unique_docs = {doc.page_content: doc for doc in all_docs}.values()
 👉 Run retrieval on each query and merge results.
 
 
-## 2. RAG Fusion (Smarter Ranking)
+### 2. RAG Fusion (Smarter Ranking)
 RAG Fusion is similar to multi-query, but it adds a ranking step. Multi-query gives you multiple result sets. RAG Fusion combines them using ranking techniques.
 
 ### Example
@@ -214,7 +214,7 @@ def reciprocal_rank_fusion(result_lists, k=60):
 
 
 
-## 3. Query Decomposition
+### 3. Query Decomposition
 
 Some questions are actually multiple questions.
 Break them down - breaking one hard question into smaller subquestions, then solving them one by one. It also highlights a variant where answers to earlier subquestions are used to help answer later ones.
@@ -236,7 +236,7 @@ sub_questions = decompose("What are the main components of an LLM-powered autono
 
 
 
-## 4. Step-Back Prompting
+### 4. Step-Back Prompting
 
 Instead of going more specific, go more abstract.
 
@@ -258,7 +258,7 @@ abstract = step_back(original)
 
 
 
-## 5. HyDE (Hypothetical Document Embeddings)
+### 5. HyDE (Hypothetical Document Embeddings)
 
 HyDE stands for Hypothetical Document Embeddings. The trick is: instead of embedding the raw user question, generate a hypothetical document that answers the question, then embed that document and retrieve using it.
 
@@ -280,7 +280,7 @@ hyde_docs = retriever.invoke(hypothetical_doc)
 
 
 
-## 6. Routing — Send Questions to the Right Place
+### 6. Routing — Send Questions to the Right Place
 
 Routing is about sending a question to the right destination. There are two types of routing:
 
@@ -307,7 +307,7 @@ def route_question(question: str):
 
 
 
-## 7. Query Construction
+### 7. Query Construction
 
 Sometimes you don’t just search—you **translate queries into structured filters**.
 
@@ -327,7 +327,7 @@ def build_filter(question: str):
 This is useful when you need to combine semantic search with structured constraints like date, author, tag, or source.
 
 
-# Putting It All Together
+## Putting It All Together
 
 Simple RAG :
 ```python
@@ -393,7 +393,7 @@ def advanced_rag_answer(question: str):
 
 
 
-# Final Thoughts
+## Final Thoughts
 
 RAG isn’t just a feature—it’s becoming the **default architecture for AI systems**.
 
