@@ -1,7 +1,11 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const thumbnailsDir = '/Users/rhythamnegi/Code/rhythamnegi/src/assets/thumbnails/';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const thumbnailsDir = path.join(__dirname, '../src/assets/thumbnails/');
 
 const items = [
   { name: 'building-rag-from-scratch-using-langchain-python', colors: ['#e0f7fa', '#80deea'] },
@@ -24,7 +28,7 @@ items.forEach(item => {
   </defs>
   <rect width="1280" height="720" fill="url(#grad)" />
 </svg>`;
-  
+
   fs.writeFileSync(path.join(thumbnailsDir, `${item.name}.svg`), svgContent);
   console.log(`Created ${item.name}.svg`);
 });
