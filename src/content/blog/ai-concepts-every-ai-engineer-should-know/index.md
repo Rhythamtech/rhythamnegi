@@ -1,7 +1,8 @@
 ---
 title: "AI Concepts Every AI Engineer Should Know"
 description: "A comprehensive brief on core AI foundations, architectures, prompting techniques, RAG, agents, and production safety."
-date: "2026-04-25"
+pubDate: "2026-04-25"
+coverImage: "../../../assets/thumbnails/ai-concepts-every-ai-engineer-should-know.svg"
 tags:
   - ai
   - engineering

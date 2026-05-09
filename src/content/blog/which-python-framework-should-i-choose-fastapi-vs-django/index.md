@@ -1,7 +1,8 @@
 ---
 title: "FastAPI vs Django: Which Framework Should You Choose for API Development?"
 description: "A comparison between FastAPI and Django for building Python APIs, focusing on use cases and production benefits."
-date: "2026-04-25"
+pubDate: "2026-04-25"
+coverImage: "../../../assets/thumbnails/which-python-framework-should-i-choose-fastapi-vs-django.svg"
 tags:
   - python
   - fastapi

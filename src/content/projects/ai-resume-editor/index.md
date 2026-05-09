@@ -1,7 +1,8 @@
 ---
 title: "AI Resume Editor"
 description: "An AI-powered tool that analyzes, improves, and tailors resumes for specific job descriptions using LLMs — featuring PDF parsing, ATS keyword extraction, and 4 HTML resume templates."
-date: "04/25/2024"
+pubDate: "04/25/2024"
+coverImage: "../../../assets/thumbnails/ai-resume-editor.svg"
 repoURL: "https://github.com/Rhythamtech/AI-Resume-Editor"
 ---
 

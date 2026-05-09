@@ -1,7 +1,8 @@
 ---
 title: "Secure On-Premise LLMs for Banking: Data Privacy Without Hosted APIs"
 description: "Deploy self-hosted large language models (LLMs) on your infrastructure to process sensitive financial data locally, ensuring zero data sharing with third parties."
-date: "2026-04-25"
+pubDate: "2026-04-25"
+coverImage: "../../../assets/thumbnails/llm-with-data-privacy.svg"
 tags:
   - ai
   - llm

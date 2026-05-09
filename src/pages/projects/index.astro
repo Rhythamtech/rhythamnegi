@@ -1,32 +1,20 @@
 ---
-import { getCollection } from "astro:content";
-import Layout from "@layouts/Layout.astro";
-import Container from "@components/Container.astro";
-import ArrowCard from "@components/ArrowCard.astro";
-import { PROJECTS } from "@consts";
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectList from '../../components/ProjectList.astro';
 
-const projects = (await getCollection("projects"))
-  .filter((project) => !project.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const projects = (await getCollection('projects')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<Layout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
-  <Container>
-    <aside data-pagefind-ignore>
-      <div class="space-y-10">
-        <div class="animate font-semibold text-black dark:text-white">
-          Projects
-        </div>
-        <ul class="animate not-prose flex flex-col gap-4">
-          {
-            projects.map((project) => (
-              <li>
-                <ArrowCard entry={project} />
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-    </aside>
-  </Container>
-</Layout>
+<BaseLayout
+	title="All My Projects"
+	description="All my project portfolio from real projects to open source projects."
+>
+  <div class='container'>
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold mb-2">All My Projects</h1>
+      <p class="text-zinc-700 dark:text-zinc-300 text-lg">All my project portfolio from real projects to open source projects.</p>
+    </div>
+    <ProjectList projects={projects}/>
+  </div>
+</BaseLayout>

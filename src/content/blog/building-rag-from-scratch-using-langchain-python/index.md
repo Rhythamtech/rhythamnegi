@@ -1,7 +1,8 @@
 ---
 title: "Building RAG from Scratch: A Practical Guide to Retrieval-Augmented Generation"
 description: "How to combine LLMs with your own data—and actually make them useful in the real world."
-date: "2026-04-26"
+pubDate: "2026-04-26"
+coverImage: "../../../assets/thumbnails/building-rag-from-scratch-using-langchain-python.svg"
 tags:
   - rag
   - langchain

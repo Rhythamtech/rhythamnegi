@@ -1,7 +1,8 @@
 ---
 title: "Understanding React’s Virtual DOM: A Deep-Dive"
 description: "React’s Virtual DOM (VDOM) is more than a performance trick—it’s the foundation that lets us write declarative UI while keeping updates efficient and predictable."
-date: "2026-05-08"
+pubDate: "2026-05-08"
+coverImage: "../../../assets/thumbnails/understanding-reacts-virtual-dom-a-deep-dive.svg"
 tags:
   - react
   - javascript

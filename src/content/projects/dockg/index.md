@@ -1,7 +1,8 @@
 ---
 title: "DocKG"
 description: "A Document Knowledge Graph system for structuring and visualizing extracted PDF content using NLP and Graph databases."
-date: "04/18/2024"
+pubDate: "04/18/2024"
+coverImage: "../../../assets/thumbnails/dockg.svg"
 ---
 
 ## 🏗️ Overview

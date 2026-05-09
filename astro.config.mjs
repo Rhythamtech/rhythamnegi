@@ -1,19 +1,19 @@
-import { defineConfig } from "astro/config";
-import sitemap from "@astrojs/sitemap";
-import mdx from "@astrojs/mdx";
-import pagefind from "astro-pagefind";
-import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from 'astro/config';
+import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
+import tailwind from "@astrojs/tailwind";
+import { autoNewTabExternalLinks } from './src/autoNewTabExternalLinks';
+
+import partytown from "@astrojs/partytown";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://astro-micro.vercel.app",
-  integrations: [sitemap(), mdx(), pagefind()],
-  vite: {
-    plugins: [tailwindcss()],
-  },
+  site: 'https://rhythamnegi.com',
+  integrations: [mdx(), sitemap(), tailwind(), partytown()],
   markdown: {
-    shikiConfig: {
-      theme: "css-variables",
-    },
-  },
+    extendDefaultPlugins: true,
+    rehypePlugins: [[autoNewTabExternalLinks, {
+      domain: 'localhost:4321'
+    }]]
+  }
 });

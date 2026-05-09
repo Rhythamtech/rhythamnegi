@@ -1,7 +1,8 @@
 ---
 title: "Sqlwise AI Agent"
 description: "An Advanced Reflect-and-Heal (RAH) SQL Agent for E-Commerce Analytics that plans, validates, executes, debugs, and self-heals SQL queries using LangChain, Qdrant, and GPT-4o."
-date: "04/25/2024"
+pubDate: "04/25/2024"
+coverImage: "../../../assets/thumbnails/sqlwise-ai-agent.svg"
 repoURL: "https://github.com/Rhythamtech/Sqlwise-AI-Agent"
 ---
 

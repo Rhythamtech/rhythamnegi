@@ -1,7 +1,8 @@
 ---
 title: "How Large Language Models Work Under the Hood"
 description: "An explainer on tokens, embeddings, transformer architecture, and how LLMs generate responses."
-date: "2026-04-25"
+pubDate: "2026-04-25"
+coverImage: "../../../assets/thumbnails/how-llms-works-under-the-hood.svg"
 tags:
   - ai
   - llm

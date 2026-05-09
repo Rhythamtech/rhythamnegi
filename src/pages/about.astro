@@ -1,0 +1,88 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Ava from '@src/assets/img/pfp.png';
+import Prose from '../components/Prose.astro';
+
+---
+
+<BaseLayout
+	title="About Me"
+	description="Lorem ipsum dolor sit amet"
+>
+  <div class='container'>
+		<main class='prose text-lg dark:prose-invert'>
+      <article>
+        <div class='w-full md:flex md:items-center gap-16 mb-10'>
+          <div class="text-pretty leading-9">
+            <h1 class="text-4xl font-bold mb-4 italic">About Me</h1>
+            <Prose>
+              <div class="text-lg">
+                <p>I'm an Innovative AI Engineer with 4 years of experience enhancing media products through advanced AI technologies. My expertise lies in automating business insights, which has led to streamlined decision-making and significant efficiency gains.</p>
+              </div>
+            </Prose>
+          </div>
+          <Image src={Ava} alt="Profile Picture" width={300}  class="rounded-3xl rotate-3 mx-4 md:mx-0 shadow-xl border-4 border-white dark:border-zinc-800"/>
+        </div>     
+        <div>
+          <h2 class="text-2xl font-bold mb-4">Experience</h2>
+          
+          <div class="mb-6">
+            <h3 class="text-xl font-bold">Publicis Groupe, Gurugram, India</h3>
+            <p class="italic text-zinc-600 dark:text-zinc-400">Software Developer - AI/ML | October 2024 - Present</p>
+            <ul class="list-disc ml-6 mt-2">
+              <li>Embedded LLMs to generate real-time automated business insights in a media product.</li>
+              <li>Built NLP workflows and RAG pipelines using LangChain, LangGraph, and Redis.</li>
+              <li>Managed model lifecycle across proprietary and open-source models based on performance and cost.</li>
+              <li>Implemented multi-modal AI features using Azure OpenAI for vision and speech analysis.</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="text-xl font-bold">Publicis Groupe, Gurugram, India</h3>
+            <p class="italic text-zinc-600 dark:text-zinc-400">Associate Software Developer | August 2022 - December 2024</p>
+            <ul class="list-disc ml-6 mt-2">
+              <li>Data Engineering: Engineered data pipelines data flow from 8+ platforms (e.g., Google, Amazon, Zepto) into STG/DIM/FACT tables.</li>
+              <li>Database Development: Created optimized Stored Procedures and SQL Views to support Power BI dashboard reporting.</li>
+              <li>Backend Development: Developed and enhanced RESTful APIs using Java and Spring Boot.</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="text-xl font-bold">Publicis Groupe, Gurugram, India</h3>
+            <p class="italic text-zinc-600 dark:text-zinc-400">Software - Intern | February 2022 - September 2022</p>
+            <ul class="list-disc ml-6 mt-2">
+              <li>Contributed to the development of an internal product at Publicis Media as a software engineering intern.</li>
+              <li>Designed and created database tables to support application features and data storage.</li>
+              <li>Implemented backend features using Spring Boot and REST APIs.</li>
+              <li>Analyzed production-grade API architecture and data flow to improve system understanding and performance.</li>
+            </ul>
+          </div>
+
+          <h2 class="text-2xl font-bold mb-4 mt-10">Skills</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 class="text-lg font-bold">Technical Skills</h3>
+              <p>Java, Python, Django Framework, FastAPI, Generative AI, NLP, LangChain, LangGraph</p>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold">Tools & OS</h3>
+              <p>Windows, Linux, MS-DOS, MS Office</p>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold">Languages</h3>
+              <p>English, Hindi</p>
+            </div>
+          </div>
+
+          <h2 class="text-2xl font-bold mb-4 mt-10">Education & Certifications</h2>
+          <ul class="list-disc ml-6">
+            <li>Full stack generative and Agentic AI with python - Udemy</li>
+            <li>Ultimate RAG Bootcamp Using Langchain, LangGraph & Langsmith - Udemy</li>
+          </ul>
+        </div>
+        </article>
+      </article>
+    </main>
+  </div>
+</BaseLayout>

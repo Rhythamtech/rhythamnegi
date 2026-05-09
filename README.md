@@ -1,79 +1,71 @@
-# Rhytham Negi | AI Engineer Portfolio
+# Devolio
 
-Welcome to my personal portfolio and blog! This site showcases my work as an AI Engineer, focusing on advanced AI infrastructure, Generative AI, and Large Language Models (LLMs).
+Devolio is a free portfolio and blog template to help you setup your personal website quickly.
 
-## 🚀 Overview
-
-This website is built using **Astro**, a modern web framework for building fast, content-focused websites. It uses the **Astro Micro** theme, providing a lightweight, accessible, and high-performance base.
-
-- **URL:** [rhythamnegi.com](https://rhythamnegi.com)
-- **Tech Stack:** Astro, Tailwind CSS, TypeScript, MDX.
-
-## ✨ Features
-
-- **Blog:** In-depth articles on AI, LLMs, and software engineering.
-- **Projects:** A curated collection of my work with links to repositories and demos.
-- **Search:** Built-in search functionality powered by [Pagefind](https://pagefind.app).
-- **Theming:** Full support for Light, Dark, and System themes.
-- **SEO:** Optimized for search engines with sitemaps and RSS feeds.
-- **Performance:** Extremely fast load times with zero-JS by default (where possible).
-
-## 🛠️ Tech Stack
-
-- **Framework:** [Astro](https://astro.build/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **Content:** Markdown & [MDX](https://mdxjs.com/)
-- **Fonts:** [Geist](https://vercel.com/font)
-- **Deployment:** Vercel (or preferred provider)
-
-## 📂 Project Structure
-
-```text
-├── src/
-│   ├── components/    # Reusable UI components
-│   ├── content/       # Blog posts and project data (Markdown/MDX)
-│   ├── layouts/       # Page layouts
-│   ├── pages/         # Site routes and pages
-│   ├── styles/        # Global CSS and Tailwind configurations
-│   └── consts.ts      # Site-wide constants and metadata
-├── public/            # Static assets
-└── astro.config.mjs   # Astro configuration
-```
-
-## ⌨️ Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18.20.8 or higher)
-- [npm](https://www.npmjs.com/) or [pnpm](https://pnpm.io/)
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Rhythamtech/rhythamnegi.git
-   cd rhythamnegi
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Build for production:
-   ```bash
-   npm run build
-   ```
-
-## 📄 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+[Demo](https://devolio.devaradise.com) [Article](https://devaradise.com/devolio-astro-portfolio-blog-theme/)
 
 ---
 
-Developed by [Rhytham Negi](https://github.com/Rhythamtech)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/devaradise/devolio)
+[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/devaradise/devolio)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/devaradise/devolio?devcontainer_path=.devcontainer/blog/devcontainer.json)
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify-templates/next-netlify-starter)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fdevaradise%2Fdevolio)
+
+Features:
+
+- ✅ Minimal styling (make it your own!)
+- ✅ 100/100 Lighthouse performance
+- ✅ SEO-friendly with canonical URLs and OpenGraph data
+- ✅ Sitemap support
+- ✅ RSS Feed support
+- ✅ Markdown & MDX support
+- ✅ Post tags
+- ✅ Projects
+- ✅ Table of content
+
+## 🚀 Project Structure
+
+Inside of your Astro project, you'll see the following folders and files:
+
+```text
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── content/
+│   ├── layouts/
+│   └── pages/
+│   └── styles/
+├── astro.config.mjs
+├── README.md
+├── package.json
+└── tsconfig.json
+```
+
+Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+
+There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+
+The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+
+Any static assets, like images, can be placed in the `public/` directory.
+
+## 🧞 Commands
+
+All commands are run from the root of the project, from a terminal:
+
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `pnpm install`             | Installs dependencies                            |
+| `pnpm run dev`             | Starts local dev server at `localhost:4321`      |
+| `pnpm run build`           | Build your production site to `./dist/`          |
+| `pnpm run preview`         | Preview your build locally, before deploying     |
+| `pnpm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| `pnpm run astro -- --help` | Get help using the Astro CLI                     |
+
+## 👀 Want to learn more?
+
+Check out [Astro documentation](https://docs.astro.build).
+

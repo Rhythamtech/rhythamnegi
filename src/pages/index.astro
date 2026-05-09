@@ -1,119 +1,64 @@
 ---
-import Layout from "@layouts/Layout.astro";
-import Container from "@components/Container.astro";
-import { SITE, HOME, SOCIALS } from "@consts";
-import ArrowCard from "@components/ArrowCard.astro";
-import Link from "@components/Link.astro";
-import { getCollection } from "astro:content";
-import type { CollectionEntry } from "astro:content";
+import { SITE_TITLE, SITE_TAGLINE, SITE_DESCRIPTION } from '../consts';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import pfp from '@src/assets/img/pfp.png';
+import banner from '@src/assets/img/banner.png';
+import Prose from '../components/Prose.astro';
+import ProjectList from '../components/ProjectList.astro'
+import PostItem from '../components/PostItem.astro';
 
-const blog = (await getCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
+type BlogPost = CollectionEntry<'blog'>;
 
-const projects: CollectionEntry<"projects">[] = (
-  await getCollection("projects")
-)
-  .filter((project) => !project.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
+const projects = (await getCollection('projects')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const top6Projects = projects.slice(0, 6);
+const posts = (await getCollection('blog')).sort((a: BlogPost, b: BlogPost) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 5);
 ---
 
-<Layout title={HOME.TITLE} description={HOME.DESCRIPTION}>
-  <Container>
-    <aside data-pagefind-ignore>
-      <h1 class="font-semibold text-black dark:text-white">
-        Rhytham Negi
-      </h1>
-      <div class="space-y-16">
-        <section>
-          <article class="space-y-4">
-            <p>
-              AI Engineer building advanced AI infrastructure and automated
-              business insights with Generative AI and Large Language Models.
-            </p>
-            <p>
-              Innovative AI Engineer with 4+ years of experience enhancing
-              media products with advanced AI technologies. I automate
-              business insights to streamline decision-making and drive
-              efficiency gains using cutting-edge Generative AI.
-            </p>
-          </article>
-        </section>
-
-        <section class="animate space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-y-2">
-            <h2 class="font-semibold text-black dark:text-white">
-              Latest posts
-            </h2>
-            <Link href="/blog"> See all posts </Link>
+<BaseLayout title={SITE_TITLE + ' - ' + SITE_TAGLINE} description={SITE_DESCRIPTION}>
+	<div class='container'>
+    <div class='mb-8 rounded-3xl overflow-hidden shadow-2xl'>
+      <Image src={banner} alt="Banner" class="w-full h-auto object-cover max-h-[300px] md:max-h-[400px]"/>
+    </div>
+		<div class='w-full md:flex md:items-center gap-16 mb-10'>
+      <div class="text-pretty leading-9 flex-1">
+        <h1 class="text-4xl font-bold mb-4 italic">Innovative AI Engineer</h1>
+        <Prose>
+          <div class="text-lg">
+            <p>I'm Rhytham Negi, an AI Engineer with 4 years of experience enhancing media products through advanced AI technologies. I specialize in building NLP workflows, RAG pipelines, and multi-modal AI features.</p>
+            <p>Automated business insights led to streamlined decision-making and efficiency gains. Feel free to explore my projects and read my latest thoughts on the blog.</p>  
           </div>
-          <ul class="not-prose flex flex-col gap-4">
-            {
-              blog.map((post) => (
-                <li>
-                  <ArrowCard entry={post} />
-                </li>
-              ))
-            }
-          </ul>
-        </section>
-
-        <section class="animate space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-y-2">
-            <h2 class="font-semibold text-black dark:text-white">
-              Recent projects
-            </h2>
-            <Link href="/projects"> See all projects </Link>
-          </div>
-          <ul class="not-prose flex flex-col gap-4">
-            {
-              projects.map((project) => (
-                <li>
-                  <ArrowCard entry={project} />
-                </li>
-              ))
-            }
-          </ul>
-        </section>
-
-        <section class="animate space-y-4">
-          <h2 class="font-semibold text-black dark:text-white">
-            Let's Connect
-          </h2>
-          <article>
-            <p>
-              If you want to get in touch with me about something or just to say
-              hi, reach out on social media or send me an email.
-            </p>
-          </article>
-          <ul class="not-prose flex flex-wrap gap-2">
-            {
-              SOCIALS.map((SOCIAL) => (
-                <li class="flex gap-x-2 text-nowrap">
-                  <Link
-                    href={SOCIAL.HREF}
-                    external
-                    aria-label={`${SITE.TITLE} on ${SOCIAL.NAME}`}
-                  >
-                    {SOCIAL.NAME}
-                  </Link>
-                  {"/"}
-                </li>
-              ))
-            }
-            <li class="line-clamp-1">
-              <Link
-                href={`mailto:${SITE.EMAIL}`}
-                aria-label={`Email ${SITE.TITLE}`}
-              >
-                {SITE.EMAIL}
-              </Link>
-            </li>
-          </ul>
-        </section>
+        </Prose>
       </div>
-    </aside>
-  </Container>
-</Layout>
+      <div class="flex-shrink-0">
+        <Image src={pfp} alt="Profile Picture" width={300} loading="eager" class="rounded-3xl rotate-3 mx-4 md:mx-0 shadow-xl border-4 border-white dark:border-zinc-800"/>
+      </div>
+		</div>
+		<main>
+      <div class='mt-6 mb-12'>
+        <div class="flex justify-between gap-2 border-b mb-1 dark:border-b-zinc-700">
+          <h2 class="text-lg font-bold mb-3">Recent Posts</h2>
+          <a href="/blog/" class="inline-block py-2 underline dark:prose-invert">All posts &raquo;</a>
+        </div>
+        <div>
+          {
+            posts.map((post: BlogPost) => (
+              <PostItem post={post} />
+            ))
+          }      
+        </div>
+        <div class="text-right">
+        </div>
+      </div>
+      <div>
+        <div class="flex justify-between gap-2 mb-1">
+          <h2 class="text-lg font-bold mb-3">My Projects</h2>
+          <a href="/projects/" class="inline-block py-2 underline dark:prose-invert">All projects &raquo;</a>
+        </div>
+        <ProjectList projects={top6Projects}/>
+      </div>
+		</main>
+	</div>
+</BaseLayout>

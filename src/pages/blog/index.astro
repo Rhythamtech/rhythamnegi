@@ -1,55 +1,25 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
-import Layout from "@layouts/Layout.astro";
-import Container from "@components/Container.astro";
-import ArrowCard from "@components/ArrowCard.astro";
-import { BLOG } from "@consts";
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostsByYear from '../../components/PostsByYear.astro';
 
-const data = (await getCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+type BlogPost = CollectionEntry<'blog'>;
+const title = 'All posts'
+const description = 'Articles, guides, tutorials about front-end development.'
 
-type Acc = {
-  [year: string]: CollectionEntry<"blog">[];
-};
-
-const posts = data.reduce((acc: Acc, post) => {
-  const year = post.data.date.getFullYear().toString();
-  if (!acc[year]) {
-    acc[year] = [];
-  }
-  acc[year].push(post);
-  return acc;
-}, {});
-
-const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
+const posts = (await getCollection('blog')).sort((a: BlogPost, b: BlogPost) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<Layout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
-  <Container>
-    <aside data-pagefind-ignore>
-      <div class="space-y-10">
-        <div class="space-y-4">
-          {
-            years.map((year) => (
-              <section class="animate space-y-4">
-                <div class="font-semibold text-black dark:text-white">
-                  {year}
-                </div>
-                <div>
-                  <ul class="not-prose flex flex-col gap-4">
-                    {posts[year].map((post) => (
-                      <li>
-                        <ArrowCard entry={post} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </section>
-            ))
-          }
-        </div>
-      </div>
-    </aside>
-  </Container>
-</Layout>
+<BaseLayout
+	title={title}
+	description={description}
+>
+  <div class='container'>
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold mb-2">{title}</h1>
+      <p class="text-zinc-700 dark:text-zinc-300 text-lg">{description}</p>
+    </div>
+    <PostsByYear posts={posts}/>
+  </div>
+</BaseLayout>
