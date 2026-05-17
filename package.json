@@ -30,6 +30,11 @@
     "prettier-plugin-astro": "^0.14.1",
     "vite": "^5.4.8"
   },
+  "overrides": {
+    "@astrojs/tailwind": {
+      "astro": "$astro"
+    }
+  },
   "engines": {
     "node": ">=23.0.0"
   }
