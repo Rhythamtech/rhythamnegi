@@ -24,13 +24,13 @@ On-premise LLMs keep all customer data, transaction records, and compliance info
 - **Compliance Ready**: Full audit trails and air-gapped options for high-security workloads. [sombrainc](https://sombrainc.com/blog/llms-in-banking)
 
 ```mermaid
-graph TD
-    A[Banking Data<br/>(Transactions, PII)] --> B[On-Premise LLM<br/>(Self-Hosted)]
-    B --> C[Secure Processing<br/>(No External APIs)]
-    C --> D[Outputs: Insights,<br/>Reports, Alerts]
-    E[Hardware: GPUs,<br/>RAM] --> B
-    F[Regulations:<br/>GDPR, PCI-DSS] -.-> B
-    style B fill:#90EE90
+flowchart TD
+    Data["Banking Data<br/>(Transactions, PII)"] --> LLM["On-Premise LLM<br/>(Self-Hosted)"]
+    HW["Hardware<br/>(Dedicated GPUs, RAM)"] --> LLM
+    Regs["Regulations<br/>(GDPR, PCI-DSS)"] -.-> LLM
+    
+    LLM --> Proc["Secure Processing<br/>(No External APIs)"]
+    Proc --> Out["Outputs<br/>(Insights, Reports, Alerts)"]
 ```
 
 ## Top Self-Hosted LLM Tools (2026)
@@ -51,16 +51,19 @@ Recommended models: LLaMA 3 (8B-70B), Mistral, Qwen 2.5 for finance tuning. [blo
 For 7B models (e.g., fraud chatbots): 1x NVIDIA A100 40GB GPU, 64GB RAM, NVMe SSD. Scale to 70B for complex analysis: 4-8x H100 GPUs, 256GB+ RAM. Enterprise banking often uses GPU clusters in air-gapped data centers. [booleanbeyond](https://www.booleanbeyond.com/en/solutions/private-llm-deployment/on-premise-llm-infrastructure-requirements)
 
 ```mermaid
-flowchart LR
-    A[Assess Use Case<br/>(e.g., 7B vs 70B Model)] --> B{Hardware Needs?}
-    B -->|Small| C[1x A100 GPU<br/>64GB RAM]
-    B -->|Large| D[4x H100 GPUs<br/>256GB RAM]
-    C --> E[Install Tool<br/>(Ollama/vLLM)]
+flowchart TD
+    A["Assess Use Case<br/>(e.g., 7B vs 70B Model)"] --> B{"Hardware Needs?"}
+    
+    B -->|Small Scale| C["1x A100 GPU<br/>64GB RAM"]
+    B -->|Large Scale| D["4x H100 GPUs<br/>256GB RAM"]
+    
+    C --> E["Install Tool<br/>(Ollama / vLLM)"]
     D --> E
-    E --> F[Download Model<br/>(Hugging Face)]
-    F --> G[Fine-Tune if Needed<br/>(Proprietary Data)]
-    G --> H[Deploy API Endpoint<br/>Integrate to Banking App]
-    H --> I[Monitor & Scale]
+    
+    E --> F["Download Model<br/>(Hugging Face)"]
+    F --> G["Fine-Tune if Needed<br/>(Proprietary Data)"]
+    G --> H["Deploy API Endpoint<br/>(Integrate to App)"]
+    H --> I["Monitor & Scale"]
 ```
 
 ## Step-by-Step On-Premise Setup Guide
@@ -77,14 +80,16 @@ This setup powers tasks like compliance reporting or customer query analysis wit
 
 ```mermaid
 sequenceDiagram
-    participant B as Banking App
-    participant L as Local LLM Server
-    participant M as Model (e.g., LLaMA3)
-    B->>L: Query (e.g., "Analyze transaction")
-    L->>M: Process Locally
-    Note over L,M: Data Stays On-Premise
-    M->>L: Response
-    L->>B: Secure Output
+    autonumber
+    actor App as Banking Application
+    participant Server as Local LLM Server
+    participant Model as Local Model (LLaMA 3)
+    
+    App->>Server: Query (e.g., "Analyze transaction")
+    Server->>Model: Process prompt locally
+    Note over Server,Model: Zero-Data Leakage: All processing remains on-premise
+    Model->>Server: Generate response tokens
+    Server->>App: Return secure output
 ```
 
 ## Banking Use Cases & ROI

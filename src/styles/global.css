@@ -1,9 +1,49 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --mermaid-fg: #0f172a;
+  --mermaid-line: #cbd5e1;
+  --mermaid-accent: #2563eb;
+  --mermaid-muted: #64748b;
+}
+
+.dark {
+  --mermaid-fg: #f1f5f9;
+  --mermaid-line: #475569;
+  --mermaid-accent: #3b82f6;
+  --mermaid-muted: #94a3b8;
+}
+
 @layer base {
 	pre,
 	code {
 		font-size: 0.875rem;
 	}
+
+  /* Mermaid diagram styling */
+  .mermaid-diagram {
+    @apply flex justify-center my-8 rounded-xl p-6 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-200/60 dark:border-zinc-800/60 overflow-x-auto;
+  }
+
+  .mermaid-diagram svg {
+    @apply max-w-full h-auto;
+    min-width: min(100%, 550px);
+  }
+
+  /* Code block styling for Tailwind Typography */
+  .prose pre {
+    @apply bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 overflow-x-auto my-6;
+  }
+
+  .prose code:not(pre code) {
+    @apply px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 font-mono text-sm;
+  }
+
+  /* Remove default quotes from Tailwind Typography code blocks */
+  .prose code::before,
+  .prose code::after {
+    content: "" !important;
+  }
 }

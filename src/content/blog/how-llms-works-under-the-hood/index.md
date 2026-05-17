@@ -17,17 +17,17 @@ An LLM is, at heart, a **next‑token predictor**: given your prompt, it estimat
 
 
 ```mermaid
-graph LR
-    A[Input Sequence] --> B(Tokenization)
-    B --> C[Token IDs]
-    C --> D[LLM Model]
-    D --> E[Next‑Token<br/>Probability Distribution]
-    E --> F{Sampling<br/>(e.g., top‑k / nucleus)}
-    F --> G[Selected Token]
-    G --> H[Append to Output]
-    H --> I{End of<br/>sequence?}
+flowchart TD
+    A["Input Sequence"] --> B("Tokenization")
+    B --> C["Token IDs"]
+    C --> D["LLM Model"]
+    D --> E["Next-Token<br/>Probability Distribution"]
+    E --> F{"Sampling<br/>(e.g., top-k / nucleus)"}
+    F --> G["Selected Token"]
+    G --> H["Append to Output"]
+    H --> I{"End of<br/>Sequence?"}
     I -->|No| D
-    I -->|Yes| J[Final Output Text]
+    I -->|Yes| J["Final Output Text"]
 ``` 
 *Figure: How an LLM takes a sequence, predicts probabilities for the next token, and generates the next word or subword.*
 
@@ -48,16 +48,22 @@ Most modern LLMs use a **decoder‑only Transformer** architecture, in which:
 The architecture is “decoder‑only” because it only needs to read the prefix and generate the continuation, not encode a separate source sequence.
 
 ```mermaid
-graph TD
-    A[Input Tokens] --> B[Token Embedding<br/>Layer]
-    B --> C[Positional<br/>Encoding]
-    C --> D[Layer Normalization]
-    D --> E[Multi‑Head<br/>Self‑Attention]
-    E --> F[Residual<br/>Connection]
-    F --> G[Layer Normalization]
-    G --> H[Feed‑Forward<br/>MLP]
-    H --> I[Residual<br/>Connection]
-    I --> J[Output<br/>for next layer]
+flowchart TD
+    A["Input Tokens"] --> B["Token Embedding Layer"]
+    C["Positional Encoding"] --> B
+    B --> LN1["Layer Normalization"]
+    
+    LN1 --> MHA["Multi-Head Self-Attention"]
+    LN1 --> Add1["Add (Residual)"]
+    MHA --> Add1
+    
+    Add1 --> LN2["Layer Normalization"]
+    
+    LN2 --> MLP["Feed-Forward MLP"]
+    LN2 --> Add2["Add (Residual)"]
+    MLP --> Add2
+    
+    Add2 --> Out["Output for Next Layer"]
 ```
 *Figure: A decoder‑only Transformer block with embedding, normalization, self‑attention, and feed‑forward layers.*
 
@@ -66,14 +72,16 @@ graph TD
 Self‑attention lets every token “attend” to all previous tokens in the sequence, weighting how much each one matters for the current prediction.  This is why LLMs can handle long‑range dependencies and context: every word in the prompt can influence later tokens.
 
 ```mermaid
-graph TD
-    A[Input Representation] --> B[Layer Norm]
-    B --> C[Multi‑Head<br/>Self‑Attention]
-    C --> D[Residual<br/>Connection]
-    D --> E[Layer Norm]
-    E --> F[Feed‑Forward<br/>Network (MLP)]
-    F --> G[Residual<br/>Connection]
-    G --> H[Output to<br/>Next Block]
+flowchart TD
+    Input["Input Vectors (X)"] --> Q["Query Projection (Q)"]
+    Input --> K["Key Projection (K)"]
+    Input --> V["Value Projection (V)"]
+    
+    Q & K --> Dot["MatMul (Q × Kᵀ)"]
+    Dot --> Scale["Scale & Softmax<br/>(Attention Weights)"]
+    Scale & V --> WeightedDot["MatMul (Weights × V)"]
+    
+    WeightedDot --> Out["Self-Attention Output"]
 ```
 *Figure: Key components of a transformer decoder block, including multi‑head self‑attention and feed‑forward modules.*
 
@@ -88,13 +96,13 @@ LLMs are usually trained in several stages:
 These stages can be thought of as a pipeline that gradually shapes raw language capability into a usable assistant.
 
 ```mermaid
-graph LR
-    A[Massive Text Corpus] --> B[Pre‑training<br/>(Self‑supervised)]
-    B --> C[Pre‑trained<br/>Base Model]
-    C --> D[Supervised Fine‑Tuning<br/>(SFT)]
-    D --> E[Fine‑tuned<br/>Task Model]
-    E --> F[Reinforcement Learning / Alignment<br/>(RLHF or DPO)]
-    F --> G[Aligned<br/>Assistance Model]
+flowchart TD
+    A["Massive Text Corpus"] --> B["Pre-Training<br/>(Self-Supervised)"]
+    B --> C["Pre-Trained Base Model"]
+    C --> D["Supervised Fine-Tuning<br/>(SFT)"]
+    D --> E["Fine-Tuned Task Model"]
+    E --> F["Alignment<br/>(RLHF or DPO)"]
+    F --> G["Aligned Assistant Model"]
 ```
   
 *Figure: Three stages of LLM training: pre‑training, supervised fine‑tuning, and reinforcement learning / alignment.*
@@ -109,20 +117,22 @@ During inference:
 This repeats until a stop‑token is generated or the context window is full.
 
 ```mermaid
-graph LR
-    A[Input Sequence] --> B[LLM Model]
-    B --> C[Probability Distribution<br/>over Tokens]
-    C --> D[Token A: p=0.45]
-    C --> E[Token B: p=0.20]
-    C --> F[Token C: p=0.15]
-    C --> G[...: p=...]
-    D --> H{Sampling<br/>(e.g., top‑k / nucleus)}
+flowchart TD
+    A["Input Sequence"] --> B["LLM Model"]
+    B --> C["Probability Distribution over Tokens"]
+    
+    C --> D["Token A (p=0.45)"]
+    C --> E["Token B (p=0.20)"]
+    C --> F["Token C (p=0.15)"]
+    C --> G["Other Tokens"]
+    
+    D --> H{"Sampling Filter<br/>(e.g., top-k / nucleus)"}
     E --> H
     F --> H
     G --> H
-    H --> I[Selected Token]
-    H --> I[Selected Token]
-    I --> J[Append to Output]
+    
+    H --> I["Selected Token"]
+    I --> J["Append to Output & Repeat"]
 ```
 *Figure: Visualization of next‑token probabilities, showing how the model chooses among candidate tokens.*
 
