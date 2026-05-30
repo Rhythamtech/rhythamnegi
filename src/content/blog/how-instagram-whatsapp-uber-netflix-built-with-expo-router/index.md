@@ -1,7 +1,7 @@
 --- 
 title: "How Instagram, WhatsApp, Uber & Netflix Would Be Built Today Using Expo Router"
 description: "Exploring production-grade React Native architecture with Expo Router, feature-based folders, and offline-first state management."
-pubDate: "2026-05-27"
+pubDate: "2026-05-29"
 tags:
   - react-native
   - expo
