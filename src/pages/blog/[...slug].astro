@@ -27,7 +27,15 @@ const {
 const { Content, headings } = await render(post);
 ---
 
-<BaseLayout title={seoTitle || title} description={description} image={coverImage?.src || undefined}>
+<BaseLayout 
+	title={seoTitle || title} 
+	description={description} 
+	image={coverImage?.src || undefined}
+	articlePublishedTime={pubDate.toISOString()}
+	articleModifiedTime={updatedDate?.toISOString()}
+	articleTags={tags}
+	ogType='article'
+>
 	<div class='container lg:flex gap-10'>
 		<main
 			class='overflow-hidden grow'

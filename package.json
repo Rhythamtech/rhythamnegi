@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "sync-thumbnails": "node scratch/sync_thumbnails.js",
+    "build": "npm run sync-thumbnails && astro check && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },

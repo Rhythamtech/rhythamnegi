@@ -1,0 +1,98 @@
+---
+interface Props {
+	title: string;
+	description: string;
+	image?: string;
+	articlePublishedTime?: string;
+	articleModifiedTime?: string;
+	articleTags?: string[];
+	ogType?: 'website' | 'article';
+}
+
+const { 
+	title, 
+	description, 
+	image,
+	articlePublishedTime,
+	articleModifiedTime,
+	ogType = 'website'
+} = Astro.props;
+
+const siteUrl = Astro.site ? Astro.site.toString() : 'https://rhythamnegi.com';
+const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Rhytham Negi",
+  "url": siteUrl,
+  "image": new URL('/pfp.png', siteUrl).toString(),
+  "sameAs": [
+    "https://github.com/Rhythamtech",
+    "https://linkedin.com/in/rhythamnegi"
+  ],
+  "jobTitle": "Innovative AI Engineer",
+  "description": "Innovative AI Engineer specializing in NLP, RAG, and multi-modal AI."
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Rhytham Negi",
+  "url": siteUrl,
+  "description": "Innovative AI Engineer Portfolio & Blog"
+};
+
+const breadcrumbs = [
+	{ name: "Home", item: siteUrl }
+];
+
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+let currentPath = siteUrl;
+
+pathSegments.forEach((segment) => {
+	currentPath = new URL(segment + '/', currentPath).toString();
+	breadcrumbs.push({
+		name: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
+		item: currentPath
+	});
+});
+
+const breadcrumbSchema = {
+	"@context": "https://schema.org",
+	"@type": "BreadcrumbList",
+	"itemListElement": breadcrumbs.map((crumb, index) => ({
+		"@type": "ListItem",
+		"position": index + 1,
+		"name": crumb.name,
+		"item": crumb.item
+	}))
+};
+
+let articleSchema = null;
+if (ogType === 'article') {
+  articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": title,
+    "description": description,
+    "image": image ? new URL(image, siteUrl).toString() : new URL('/banner.png', siteUrl).toString(),
+    "datePublished": articlePublishedTime,
+    "dateModified": articleModifiedTime || articlePublishedTime,
+    "author": {
+      "@type": "Person",
+      "name": "Rhytham Negi",
+      "url": siteUrl
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": canonicalURL
+    }
+  };
+}
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(personSchema)} />
+<script type="application/ld+json" is:inline set:html={JSON.stringify(websiteSchema)} />
+<script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+{articleSchema && <script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />}

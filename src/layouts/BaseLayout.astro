@@ -4,14 +4,40 @@ import Header from './components/Header.astro';
 import Footer from './components/Footer.astro';
 import { loadEnv } from 'vite';
 
+interface Props {
+	title: string;
+	description: string;
+	image?: string;
+	articlePublishedTime?: string;
+	articleModifiedTime?: string;
+	articleTags?: string[];
+	ogType?: 'website' | 'article';
+}
+
 const { GTAG_MEASUREMENT_ID } = loadEnv(process.env.NODE_ENV || 'production', process.cwd(), '');
-const { title, description, image } = Astro.props;
+const { 
+	title, 
+	description, 
+	image,
+	articlePublishedTime,
+	articleModifiedTime,
+	articleTags,
+	ogType
+} = Astro.props;
 ---
 
 <!doctype html>
 <html lang='en'>
 	<head>
-		<BaseHead title={title} description={description} image={image} />
+		<BaseHead 
+			title={title} 
+			description={description} 
+			image={image} 
+			articlePublishedTime={articlePublishedTime}
+			articleModifiedTime={articleModifiedTime}
+			articleTags={articleTags}
+			ogType={ogType}
+		/>
 	</head>
 	<body
 		class="bg-white dark:bg-zinc-900 dark:text-zinc-100 pt-16 sm:pt-0"
