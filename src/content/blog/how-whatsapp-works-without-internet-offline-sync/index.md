@@ -1,7 +1,7 @@
 --- 
 title: "How WhatsApp Works Without Internet: Offline Messaging and Sync Explained"
 description: "An explanation of offline-first messaging architecture, local persistence, and eventual consistency in apps like WhatsApp."
-pubDate: "2026-05-31"
+pubDate: "2026-05-30"
 tags:
   - system-design
   - architecture
