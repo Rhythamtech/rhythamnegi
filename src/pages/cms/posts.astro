@@ -12,8 +12,33 @@ const posts = listPosts();
 
 const iso = (d: Date | null) => (d ? d.toISOString() : null);
 const saved = Astro.url.searchParams.get('saved');
+const imported = Astro.url.searchParams.get('imported');
+const skipped = Astro.url.searchParams.get('skipped');
+const error = Astro.url.searchParams.get('error') || '';
+
+const errorMessages: Record<string, string> = {
+	file: 'Choose a JSON file exported from this CMS.',
+	size: 'That file is too large (limit 25 MB).',
+	json: 'The file is not valid JSON.',
+	empty: 'The file does not contain any posts.',
+	count: 'Too many posts in one file (limit 500).',
+	import: 'Import failed — no posts were changed. Check the server logs.'
+};
+
 const notice =
-	saved === '1' ? 'Changes saved.' : saved === 'error' ? 'Saving failed — check the server logs.' : '';
+	saved === '1'
+		? 'Changes saved.'
+		: saved === 'error'
+			? 'Saving failed — check the server logs.'
+			: imported !== null
+				? `Imported ${imported} post${imported === '1' ? '' : 's'}${
+						skipped && skipped !== '0' ? `, skipped ${skipped}` : ''
+					}.`
+				: error
+					? errorMessages[error] || 'Import failed.'
+					: '';
+
+const isErrorNotice = Boolean(error);
 ---
 
 <CmsDoc title='Posts'>
@@ -25,6 +50,7 @@ const notice =
     defaultOpen={sidebarDefaultOpen}
     active='posts'
     notice={notice}
+    isErrorNotice={isErrorNotice}
     posts={posts.map((p) => ({
       id: p.id,
       title: p.title,

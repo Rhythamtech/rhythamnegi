@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { ExternalLink, MoreHorizontal, Plus, SquarePen, Trash2 } from "lucide-react"
+import { Download, ExternalLink, MoreHorizontal, Plus, SquarePen, Trash2, Upload } from "lucide-react"
 
 import { Button } from "@src/components/ui/button"
 import { Card, CardContent } from "@src/components/ui/card"
@@ -11,9 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@src/components/ui/dropdown-menu"
+import { Input } from "@src/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@src/components/ui/table"
 import { CmsShell, type ActiveKey } from "@src/components/cms/shell"
-import { StatusBadge, formatDate, postAction } from "@src/components/cms/helpers"
+import { StatusBadge, formatDate, postAction, submitForm } from "@src/components/cms/helpers"
 
 export type PostListRow = {
   id: number
@@ -34,6 +35,7 @@ export type PostsViewProps = {
   defaultOpen?: boolean
   posts: PostListRow[]
   notice: string
+  isErrorNotice?: boolean
 }
 
 function deletePost(event: React.MouseEvent<HTMLButtonElement>, id: number): void {
@@ -57,19 +59,68 @@ export function PostsView(props: PostsViewProps) {
           <h1 className="text-xl font-semibold tracking-tight">Posts</h1>
           <p className="text-sm text-muted-foreground">{props.posts.length} posts stored in SQLite.</p>
         </div>
-        <Button asChild size="sm">
-          <a href="/cms/post-edit?id=new">
-            <Plus />
-            New post
-          </a>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild size="sm" variant="outline">
+            <a href="/cms/api/posts/export" download>
+              <Download />
+              Export
+            </a>
+          </Button>
+          <Button asChild size="sm">
+            <a href="/cms/post-edit?id=new">
+              <Plus />
+              New post
+            </a>
+          </Button>
+        </div>
       </div>
 
       {props.notice ? (
-        <Card className="border-emerald-200 bg-emerald-50 py-3">
-          <CardContent className="text-sm text-emerald-800 px-4 py-0">{props.notice}</CardContent>
+        <Card
+          className={
+            props.isErrorNotice
+              ? "border-red-200 bg-red-50 py-3"
+              : "border-emerald-200 bg-emerald-50 py-3"
+          }
+        >
+          <CardContent
+            className={
+              props.isErrorNotice
+                ? "text-sm text-red-700 px-4 py-0"
+                : "text-sm text-emerald-800 px-4 py-0"
+            }
+          >
+            {props.notice}
+          </CardContent>
         </Card>
       ) : null}
+
+      <details className="rounded-lg border bg-card px-4 py-3">
+        <summary className="cursor-pointer text-sm font-medium">Import posts (JSON)</summary>
+        <form
+          className="mt-3 flex flex-wrap items-center gap-3"
+          method="post"
+          action="/cms/api/posts/import"
+          encType="multipart/form-data"
+          onSubmit={submitForm}
+        >
+          <Input
+            type="file"
+            name="file"
+            accept="application/json,.json"
+            required
+            className="max-w-xs"
+          />
+          <Button type="submit" size="sm" variant="outline">
+            <Upload />
+            Import
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Use a file exported from this CMS. Matching slugs are updated, new ones are created.
+            Cover images are restored too.
+          </p>
+        </form>
+      </details>
 
       <Card className="overflow-hidden">
         <CardContent className="p-0">
