@@ -12,6 +12,7 @@ README.md
 LICENSE
 Dockerfile
 docker-compose.yml
+Caddyfile
 .dockerignore
 
 # Local runtime data (SQLite db + images) — must not be baked into the image

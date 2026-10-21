@@ -16,8 +16,17 @@ RUN npm ci --include=dev
 # Copy the rest of the application source code
 COPY . .
 
+# Build-time configuration. PUBLIC_GTAG_MEASUREMENT_ID is baked into the
+# client bundle by Astro/Vite (src/layouts/BaseLayout.astro), so it must be
+# present during `npm run build`. Pass with: --build-arg PUBLIC_GTAG_…=G-XXX
+ARG PUBLIC_GTAG_MEASUREMENT_ID=''
+ENV PUBLIC_GTAG_MEASUREMENT_ID=$PUBLIC_GTAG_MEASUREMENT_ID
+
 # Build the Astro server (SSR via @astrojs/node, standalone mode)
 RUN npm run build
+
+# Patch manifest to disable origin check (required for reverse proxy setups)
+RUN sed -i 's/"checkOrigin":true/"checkOrigin":false/g' /app/dist/server/chunks/*.mjs
 
 # Stage 2: Run the Node server that serves the site and the CMS dashboard
 FROM node:26-alpine
@@ -27,6 +36,36 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=4321
+
+# ---- App configuration (image defaults, overridable) ----
+# Standalone `docker run` works with these defaults. Everything is overridable:
+#   docker run -e SITE=https://mysite.dev -e CMS_PASSWORD=... devfolio
+# Secrets have NO defaults on purpose — do not bake passwords/tokens here;
+# pass them at build time or runtime instead.
+ARG SITE=http://localhost:4321
+ARG SQLITE_PATH=/app/data/cms.db
+ARG CMS_USERNAME=admin
+ARG CMS_PASSWORD=
+ARG GITHUB_PERSONAL_ACCESS_TOKEN=
+ARG AI_BASE_URL=https://api.groq.com/openai/v1
+ARG AI_API_KEY=
+ARG AI_MODEL=llama-3.3-70b-versatile
+ARG GISCUS_REPO=
+ARG GISCUS_REPO_ID=
+ARG GISCUS_CATEGORY=
+ARG GISCUS_CATEGORY_ID=
+ENV SITE=$SITE \
+	SQLITE_PATH=$SQLITE_PATH \
+	CMS_USERNAME=$CMS_USERNAME \
+	CMS_PASSWORD=$CMS_PASSWORD \
+	GITHUB_PERSONAL_ACCESS_TOKEN=$GITHUB_PERSONAL_ACCESS_TOKEN \
+	AI_BASE_URL=$AI_BASE_URL \
+	AI_API_KEY=$AI_API_KEY \
+	AI_MODEL=$AI_MODEL \
+	GISCUS_REPO=$GISCUS_REPO \
+	GISCUS_REPO_ID=$GISCUS_REPO_ID \
+	GISCUS_CATEGORY=$GISCUS_CATEGORY \
+	GISCUS_CATEGORY_ID=$GISCUS_CATEGORY_ID
 
 # Only runtime dependencies are needed for the standalone server (e.g. sharp)
 COPY package*.json ./

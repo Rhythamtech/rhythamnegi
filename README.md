@@ -53,18 +53,33 @@ Secrets stay in the environment — they are never written to the database.
 
 ## Deployment (Docker)
 
-The container runs the Astro standalone Node server (no nginx needed):
+The stack runs as two containers: a Caddy reverse proxy (automatic TLS) in front of the Astro
+standalone Node server.
+
+One command from your machine (installs Docker on the VPS if needed, syncs the code, writes
+`.env`, builds, starts and verifies HTTPS):
 
 ```bash
-docker build -t devfolio .
-docker run -p 4321:4321 \
-  -v devfolio-data:/app/data \
-  --env-file .env devfolio
+./deploy.sh user@your-vps yourdomain.com
 ```
 
-The `/app/data` volume keeps the SQLite database persistent across container updates.
-Set `CMS_PASSWORD` to a strong value and point the site's reverse proxy (TLS termination)
-at port `4321`.
+Or run the steps manually:
+
+```bash
+cp .env.example .env   # set CADDY_DOMAIN, SITE, CMS_PASSWORD, AI_API_KEY
+docker compose up -d --build
+```
+
+- With `CADDY_DOMAIN` set to a public hostname, Caddy obtains and renews a Let's Encrypt
+  certificate automatically; empty binds `localhost` for local testing.
+- The Astro server is internal-only — Caddy publishes `80`/`443` and proxies to `app:4321`
+  (HTTP/3 ready). Requires `Caddyfile` and the `caddy` service from `docker-compose.yml`.
+- Standalone image works too, with baked-in defaults from the Dockerfile:
+  `docker run -e CMS_PASSWORD=... -p 4321:4321 --env-file .env devfolio`
+
+The `./data` bind mount keeps the SQLite database persistent across rebuilds.
+Full walkthrough: **[DEPLOYMENT.md](./DEPLOYMENT.md)** — install Docker, open ports `80`/`443`,
+point an A record at the server, fill `.env`, `docker compose up -d`.
 
 ## Project layout (new)
 

@@ -10,6 +10,6 @@ export default defineConfig({
   site: 'https://rhythamnegi.com',
   // The site (and the CMS dashboard at /cms) renders content from SQLite at request time.
   output: 'server',
-  adapter: node({ mode: 'standalone' }),
+  adapter: node({ mode: 'standalone', checkOrigin: false }),
   integrations: [react(), tailwind(), partytown()]
 });

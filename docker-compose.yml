@@ -1,7 +1,11 @@
-# Containerized whole stack: Astro SSR site + CMS + AI-assist config.
+# Containerized whole stack: Caddy (TLS + reverse proxy) -> Astro SSR (site + CMS + AI-assist).
 #
-#   cp .env.example .env   # fill in CMS_PASSWORD + AI_API_KEY etc.
+#   cp .env.example .env   # set CADDY_DOMAIN + CMS_PASSWORD + AI_API_KEY etc.
 #   docker compose up -d --build
+#
+# Traffic flow: Caddy publishes 80/443 and proxies to Astro (internal only).
+#   - No CADDY_DOMAIN  -> http://localhost / https://localhost (internal cert)
+#   - Real domain      -> automatic Let's Encrypt + renewal
 #
 # The SQLite database lives on the host in ./data (persisted, gitignored),
 # so content survives rebuilds. All configuration flows in from `.env`
@@ -12,8 +16,8 @@ services:
     image: devfolio
     container_name: devfolio
     restart: unless-stopped
-    ports:
-      - '4321:4321'
+    expose:
+      - '4321'
     env_file:
       - .env
     environment:
@@ -23,3 +27,25 @@ services:
       PORT: 4321
     volumes:
       - ./data:/app/data
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: devfolio-caddy
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp' # HTTP/3
+    environment:
+      # Defaults to localhost if not set; override in .env with a real domain for TLS
+      CADDY_DOMAIN: ${CADDY_DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

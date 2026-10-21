@@ -22,13 +22,13 @@ export const onRequest = defineMiddleware((context, next) => {
 	if (normalized === '/cms' || normalized.startsWith('/cms/')) {
 		const path = normalized === '/cms' ? '/cms' : normalized;
 		if (!CMS_PUBLIC_PATHS.has(path) && !getSessionFromContext(context)) {
-			const loginUrl = new URL(context.url.toString());
-			loginUrl.pathname = '/cms/login';
-			loginUrl.search = '';
+			const forwardedOrigin = originFromHeaders(context.request);
+			const base = forwardedOrigin || context.url.origin;
+			const loginUrl = new URL('/cms/login', base);
 			return context.redirect(loginUrl.toString(), 302);
 		}
 
-		if (context.request.method === 'POST' && !isSameOrigin(context)) {
+		if (context.request.method === 'POST' && !CMS_PUBLIC_PATHS.has(path) && !isSameOrigin(context)) {
 			return new Response('Forbidden — cross-origin request rejected', { status: 403 });
 		}
 
