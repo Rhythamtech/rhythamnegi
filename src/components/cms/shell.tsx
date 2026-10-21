@@ -4,7 +4,15 @@ import { AppSidebar } from "@src/components/cms/app-sidebar"
 import { SiteHeader } from "@src/components/cms/site-header"
 import { SidebarInset, SidebarProvider } from "@src/components/ui/sidebar"
 
-export type ActiveKey = "dashboard" | "posts" | "projects" | "profile" | "about" | "images"
+export type ActiveKey =
+  | "dashboard"
+  | "posts"
+  | "projects"
+  | "profile"
+  | "about"
+  | "images"
+  | "ai"
+  | "account"
 
 export type ShellProps = {
   user: string

@@ -1,13 +1,13 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getSessionFromContext } from './lib/session';
-import { getDb, pruneSessions } from './lib/db';
+import { getDb } from './lib/db';
 
 const CMS_PUBLIC_PATHS = new Set(['/cms/login', '/cms/api/login', '/cms/api/logout']);
 
 /**
  * Global middleware:
- *  1. Initializes the SQLite database up front and occasionally drops expired sessions.
- *  2. Protects the whole /cms area with a session cookie (except the login
+ *  1. Initializes the SQLite database up front for CMS/media traffic.
+ *  2. Protects the whole /cms area with a signed JWT cookie (except the login
  *     page and the login/logout API endpoints).
  *  3. Same-origin (CSRF) check for POST requests under /cms.
  */
@@ -30,10 +30,6 @@ export const onRequest = defineMiddleware((context, next) => {
 
 		if (context.request.method === 'POST' && !CMS_PUBLIC_PATHS.has(path) && !isSameOrigin(context)) {
 			return new Response('Forbidden — cross-origin request rejected', { status: 403 });
-		}
-
-		if (Math.floor(Math.random() * 50) === 0) {
-			pruneSessions();
 		}
 	}
 

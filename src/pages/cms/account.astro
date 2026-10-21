@@ -1,0 +1,44 @@
+---
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import { getSessionFromContext } from '../../lib/session';
+import { getProfile, getSettings, mediaUrl } from '../../lib/db';
+import AccountView from '@src/components/cms/views/account-view';
+
+const session = getSessionFromContext(Astro);
+const sidebarDefaultOpen = Astro.cookies.get('sidebar_state')?.value !== 'false';
+const settings = getSettings();
+const profile = getProfile();
+
+const saved = Astro.url.searchParams.get('saved');
+const error = Astro.url.searchParams.get('error') || '';
+
+const errorMessages: Record<string, string> = {
+	current: 'The current password is incorrect.',
+	password:
+		'The new password does not meet the requirements (at least 10 characters, mixing two character types, and not containing the username).',
+	username: 'The username must be 3–32 characters: letters, numbers, dots, dashes or underscores.',
+	confirm: 'The new password confirmation does not match.',
+	config: 'No CMS account exists yet. Set CMS_USERNAME and CMS_PASSWORD in .env and restart.'
+};
+
+const notice =
+	saved === '1'
+		? 'Credentials updated. You are signed in with the new username.'
+		: error
+			? errorMessages[error] || 'Could not update the credentials.'
+			: '';
+---
+
+<CmsDoc title='Account'>
+  <AccountView
+    client:load
+    user={session?.username ?? ''}
+    currentUsername={session?.username ?? ''}
+    siteTitle={settings.site_title}
+    avatarUrl={mediaUrl(profile.avatar_media_id) || ''}
+    defaultOpen={sidebarDefaultOpen}
+    active='account'
+    notice={notice}
+    isErrorNotice={Boolean(error)}
+  />
+</CmsDoc>

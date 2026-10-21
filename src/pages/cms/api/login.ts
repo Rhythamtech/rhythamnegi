@@ -6,7 +6,6 @@ import {
 	resetLoginFailures,
 	startSession
 } from '../../../lib/session';
-import { pruneSessions } from '../../../lib/db';
 
 export const POST: APIRoute = async (context) => {
 	if (!credentialsConfigured()) {

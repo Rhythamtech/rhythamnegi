@@ -1,24 +1,20 @@
 import type { APIContext } from 'astro';
-import { SESSION_COOKIE, SESSION_DURATION_MS, checkCredentials } from './auth';
-import {
-	createSession,
-	deleteSession,
-	getValidSession,
-	pruneSessions
-} from './db';
+import { SESSION_COOKIE, SESSION_DURATION_MS } from './auth';
+import { signSessionToken, verifySessionToken } from './jwt';
 
 /**
- * Session helpers used by middleware and CMS endpoints.
+ * JWT session helpers used by middleware and CMS endpoints.
  *
- * Session state lives in SQLite (see `sessions` table); the browser only
- * receives an opaque random token in an HttpOnly cookie.
+ * The browser holds a signed, HttpOnly token; there is no server-side session
+ * table. Logout simply clears the cookie, and tokens remain valid until they
+ * expire even if the password is changed (by design — stateless sessions).
  */
 
 export type SessionInfo = { username: string; expiresAt: number };
 
 export function getSessionFromContext(context: APIContext): SessionInfo | null {
 	const token = context.cookies.get(SESSION_COOKIE)?.value;
-	return token ? toSessionInfo(getValidSession(token)) : null;
+	return token ? verifySessionToken(token) : null;
 }
 
 export function isCmsAuthed(context: APIContext): boolean {
@@ -26,26 +22,18 @@ export function isCmsAuthed(context: APIContext): boolean {
 }
 
 export function startSession(context: APIContext, username: string): void {
-	pruneSessions();
-	const { token, expiresAt } = createSession(username, SESSION_DURATION_MS);
+	const { token, expiresAt } = signSessionToken(username, SESSION_DURATION_MS);
 	context.cookies.set(SESSION_COOKIE, token, {
 		path: '/',
 		httpOnly: true,
 		sameSite: 'lax',
 		secure: isHttps(context),
-		maxAge: Math.floor(SESSION_DURATION_MS / 1000)
+		maxAge: Math.floor((expiresAt - Date.now()) / 1000)
 	});
 }
 
 export function endSession(context: APIContext): void {
-	const token = context.cookies.get(SESSION_COOKIE)?.value;
-	if (token) deleteSession(token);
 	context.cookies.delete(SESSION_COOKIE, { path: '/' });
-}
-
-function toSessionInfo(row: { username: string; expiresAt: number } | null): SessionInfo | null {
-	if (!row) return null;
-	return { username: row.username, expiresAt: row.expiresAt };
 }
 
 function isHttps(context: APIContext): boolean {
@@ -87,5 +75,3 @@ export function noteLoginFailure(ip: string): void {
 export function resetLoginFailures(ip: string): void {
 	failures.delete(ip);
 }
-
-export { SESSION_COOKIE, checkCredentials };

@@ -1,8 +1,9 @@
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
-import { randomBytes, createHash } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { getEnv } from './env';
+import { hashPassword } from './password';
 
 /**
  * SQLite layer for the whole site (content + profile + media + auth).
@@ -113,11 +114,12 @@ function initSchema(db: DatabaseSync) {
 			ord     INTEGER NOT NULL DEFAULT 0
 		);
 
-		CREATE TABLE IF NOT EXISTS sessions (
-			token      TEXT PRIMARY KEY,
-			username   TEXT NOT NULL,
-			expires_at INTEGER NOT NULL,
-			created_at TEXT NOT NULL
+		-- Single CMS account. Passwords are stored as scrypt hashes, never plaintext.
+		CREATE TABLE IF NOT EXISTS cms_account (
+			id            INTEGER PRIMARY KEY CHECK (id = 1),
+			username      TEXT NOT NULL,
+			password_hash TEXT NOT NULL,
+			updated_at    TEXT NOT NULL
 		);
 	`);
 }
@@ -147,6 +149,20 @@ function seedDefaults(db: DatabaseSync) {
 		db.prepare(
 			'INSERT INTO profile (id, name, role, bio_md) VALUES (1, ?, ?, ?)'
 		).run(DEFAULT_SETTINGS.site_title, DEFAULT_SETTINGS.site_tagline, '');
+	}
+
+	// First boot on a fresh database: import the bootstrap credentials from the
+	// environment and store only their scrypt hash. After this, the database is
+	// the source of truth and credentials are managed from the CMS.
+	const accountCount = (db.prepare('SELECT COUNT(*) AS c FROM cms_account').get() as any).c as number;
+	if (accountCount === 0) {
+		const user = getEnv('CMS_USERNAME');
+		const pass = getEnv('CMS_PASSWORD');
+		if (user && pass) {
+			db.prepare(
+				'INSERT INTO cms_account (id, username, password_hash, updated_at) VALUES (1, ?, ?, ?)'
+			).run(user, hashPassword(pass), new Date().toISOString());
+		}
 	}
 }
 
@@ -573,32 +589,39 @@ export function setProfileImage(kind: 'avatar' | 'banner', mediaId: number): voi
 	}
 }
 
+/* -------------------------------- account --------------------------------- */
+
+export type CmsAccountRow = {
+	id: number;
+	username: string;
+	password_hash: string;
+	updated_at: string;
+};
+
+export function getAccount(): CmsAccountRow | null {
+	const row = getDb()
+		.prepare('SELECT id, username, password_hash, updated_at FROM cms_account WHERE id = 1')
+		.get() as unknown as CmsAccountRow | undefined;
+	return row ?? null;
+}
+
+export function upsertAccount(username: string, passwordHash: string): void {
+	getDb()
+		.prepare(
+			`INSERT INTO cms_account (id, username, password_hash, updated_at)
+			 VALUES (1, ?, ?, ?)
+			 ON CONFLICT(id) DO UPDATE SET
+				username = excluded.username,
+				password_hash = excluded.password_hash,
+				updated_at = excluded.updated_at`
+		)
+		.run(username, passwordHash, now());
+}
+
 /* -------------------------------- sessions -------------------------------- */
 
-export function createSession(username: string, ttlMs: number): { token: string; expiresAt: number } {
-	const token = randomBytes(32).toString('hex');
-	const expiresAt = Date.now() + ttlMs;
-	getDb()
-		.prepare('INSERT INTO sessions (token, username, expires_at, created_at) VALUES (?, ?, ?, ?)')
-		.run(token, username, expiresAt, now());
-	return { token, expiresAt };
-}
-
-export function getValidSession(token: string): { username: string; expiresAt: number } | null {
-	const row = getDb()
-		.prepare('SELECT username, expires_at FROM sessions WHERE token = ?')
-		.get(token) as { username: string; expires_at: number } | undefined;
-	if (!row || row.expires_at < Date.now()) return null;
-	return { username: row.username, expiresAt: row.expires_at };
-}
-
-export function deleteSession(token: string): void {
-	getDb().prepare('DELETE FROM sessions WHERE token = ?').run(token);
-}
-
-export function pruneSessions(): void {
-	getDb().prepare('DELETE FROM sessions WHERE expires_at < ?').run(Date.now());
-}
+// Sessions are stateless JWT cookies — see src/lib/jwt.ts and src/lib/session.ts.
+// No session table is needed.
 
 /* --------------------------------- stats ---------------------------------- */
 

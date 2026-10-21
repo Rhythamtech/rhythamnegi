@@ -46,9 +46,11 @@ ARG SITE=http://localhost:4321
 ARG SQLITE_PATH=/app/data/cms.db
 ARG CMS_USERNAME=admin
 ARG CMS_PASSWORD=
+ARG JWT_SECRET=
 ARG GITHUB_PERSONAL_ACCESS_TOKEN=
 ARG AI_BASE_URL=https://api.groq.com/openai/v1
 ARG AI_API_KEY=
+ARG AI_SECRET=
 ARG AI_MODEL=llama-3.3-70b-versatile
 ARG GISCUS_REPO=
 ARG GISCUS_REPO_ID=
@@ -58,9 +60,11 @@ ENV SITE=$SITE \
 	SQLITE_PATH=$SQLITE_PATH \
 	CMS_USERNAME=$CMS_USERNAME \
 	CMS_PASSWORD=$CMS_PASSWORD \
+	JWT_SECRET=$JWT_SECRET \
 	GITHUB_PERSONAL_ACCESS_TOKEN=$GITHUB_PERSONAL_ACCESS_TOKEN \
 	AI_BASE_URL=$AI_BASE_URL \
 	AI_API_KEY=$AI_API_KEY \
+	AI_SECRET=$AI_SECRET \
 	AI_MODEL=$AI_MODEL \
 	GISCUS_REPO=$GISCUS_REPO \
 	GISCUS_REPO_ID=$GISCUS_REPO_ID \
@@ -73,6 +77,9 @@ RUN npm ci --omit=dev
 
 # Server bundle + static client assets produced by the Astro build
 COPY --from=builder /app/dist ./dist
+
+# Maintenance scripts (password reset / content migration)
+COPY --from=builder /app/scripts ./scripts
 
 # SQLite database lives in /app/data — mount a volume here to persist it
 RUN mkdir -p /app/data

@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "db:migrate": "node scripts/migrate-content.mjs",
+    "cms:reset-password": "node scripts/reset-password.mjs",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro"

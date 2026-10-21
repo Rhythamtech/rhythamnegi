@@ -5,6 +5,8 @@ import {
   Images,
   LayoutDashboard,
   LogOut,
+  ShieldCheck,
+  Sparkles,
   SquareUser,
   UserRound,
   IdCard,
@@ -61,7 +63,9 @@ export function AppSidebar(props: AppSidebarProps) {
     { key: "projects", title: "Projects", url: "/cms/projects", icon: FolderKanban },
     { key: "profile", title: "Profile & Site", url: "/cms/profile", icon: SquareUser },
     { key: "about", title: "About Page", url: "/cms/about", icon: IdCard },
-    { key: "images", title: "Images", url: "/cms/images", icon: Images }
+    { key: "images", title: "Images", url: "/cms/images", icon: Images },
+    { key: "ai", title: "AI Assist", url: "/cms/ai", icon: Sparkles },
+    { key: "account", title: "Account", url: "/cms/account", icon: ShieldCheck }
   ]
 
   return (
