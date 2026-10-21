@@ -1,0 +1,38 @@
+---
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import { getSessionFromContext } from '../../lib/session';
+import { countMedia, getProfile, getSettings, listPosts, listProjects, mediaUrl, summarizeRows } from '../../lib/db';
+import DashboardView from '@src/components/cms/views/dashboard-view';
+
+const session = getSessionFromContext(Astro);
+const sidebarDefaultOpen = Astro.cookies.get('sidebar_state')?.value !== 'false';
+const settings = getSettings();
+const profile = getProfile();
+const posts = listPosts();
+const projects = listProjects();
+
+const iso = (d: Date | null) => (d ? d.toISOString() : null);
+
+const stats = [
+	{ label: 'Published posts', value: summarizeRows('posts', 'published') },
+	{ label: 'Post drafts', value: summarizeRows('posts', 'draft') },
+	{ label: 'Published projects', value: summarizeRows('projects', 'published') },
+	{ label: 'Project drafts', value: summarizeRows('projects', 'draft') },
+	{ label: 'Images stored', value: countMedia() }
+];
+---
+
+<CmsDoc title='Dashboard'>
+  <DashboardView
+    client:load
+    user={session?.username ?? ''}
+    siteTitle={settings.site_title}
+    avatarUrl={mediaUrl(profile.avatar_media_id) || ''}
+    defaultOpen={sidebarDefaultOpen}
+    active='dashboard'
+    stats={stats}
+    recentPosts={posts.slice(0, 5).map((p) => ({ id: p.id, title: p.title, status: p.status, date: iso(p.pubDate) }))}
+    recentProjects={projects.slice(0, 5).map((p) => ({ id: p.id, title: p.title, status: p.status, date: iso(p.pubDate) }))}
+    siteUrl={Astro.site?.toString() ?? '/'}
+  />
+</CmsDoc>

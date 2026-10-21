@@ -1,0 +1,12 @@
+---
+import { credentialsConfigured } from '../../lib/auth';
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import LoginView from '@src/components/cms/views/login-view';
+
+const error = Astro.url.searchParams.get('error') || '';
+const configured = credentialsConfigured();
+---
+
+<CmsDoc title='Sign in'>
+  <LoginView client:load configured={configured} error={error} />
+</CmsDoc>

@@ -1,39 +1,41 @@
 ---
-import { SITE_TITLE, SITE_TAGLINE, SITE_DESCRIPTION } from '../consts';
-import { getCollection } from 'astro:content';
+import { getSettings, getProfile, listPosts, listProjects, mediaUrl } from '../lib/db';
+import { postViews, projectViews } from '../lib/views';
+import { renderMarkdownInline } from '../lib/markdown';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
-import pfp from '@src/assets/img/pfp.png';
-import banner from '@src/assets/img/banner.png';
+import fallbackBanner from '@src/assets/img/banner.png';
+import fallbackPfp from '@src/assets/img/pfp.png';
 import Prose from '../components/Prose.astro';
 import ProjectList from '../components/ProjectList.astro'
 import PostItem from '../components/PostItem.astro';
 
-type BlogPost = CollectionEntry<'blog'>;
+const settings = getSettings();
+const profile = getProfile();
+const top6Projects = projectViews(listProjects({ publishedOnly: true }) as any).slice(0, 6);
+const posts = postViews(listPosts({ publishedOnly: true }) as any).slice(0, 5) as any;
+const introHtml = (await renderMarkdownInline(settings.hero_intro || '')).trim();
 
-const projects = (await getCollection('projects')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const top6Projects = projects.slice(0, 6);
-const posts = (await getCollection('blog')).sort((a: BlogPost, b: BlogPost) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 5);
+const bannerSrc = mediaUrl(profile.banner_media_id) || bannerPath(fallbackBanner);
+const avatarSrc = mediaUrl(profile.avatar_media_id) || pfpPath(fallbackPfp);
+
+function bannerPath(imported: any) { return typeof imported === 'string' ? imported : imported.src; }
+function pfpPath(imported: any) { return typeof imported === 'string' ? imported : imported.src; }
 ---
 
-<BaseLayout title={SITE_TITLE + ' - ' + SITE_TAGLINE} description={SITE_DESCRIPTION}>
+<BaseLayout title={settings.site_title + ' - ' + settings.site_tagline} description={settings.site_description}>
 	<div class='container'>
     <div class='mb-8 rounded-3xl overflow-hidden shadow-2xl'>
-      <Image src={banner} alt="Banner" class="w-full h-auto object-cover max-h-[300px] md:max-h-[400px]"/>
+      <img src={bannerSrc} alt="Banner" class="w-full h-auto object-cover max-h-[300px] md:max-h-[400px]"/>
     </div>
 		<div class='w-full md:flex md:items-center gap-16 mb-10'>
       <div class="text-pretty leading-9 flex-1">
-        <h1 class="text-4xl font-bold mb-4 italic">Innovative AI Engineer</h1>
+        <h1 class="text-4xl font-bold mb-4 italic">{profile.role || settings.site_tagline}</h1>
         <Prose>
-          <div class="text-lg">
-            <p>I'm Rhytham Negi, an AI Engineer with 4 years of experience enhancing media products through advanced AI technologies. I specialize in building NLP workflows, RAG pipelines, and multi-modal AI features.</p>
-            <p>Automated business insights led to streamlined decision-making and efficiency gains. Feel free to explore my projects and read my latest thoughts on the blog.</p>  
-          </div>
+          <div class="text-lg" set:html={introHtml} />
         </Prose>
       </div>
       <div class="flex-shrink-0">
-        <Image src={pfp} alt="Profile Picture" width={300} loading="eager" class="rounded-3xl rotate-3 mx-4 md:mx-0 shadow-xl border-4 border-white dark:border-zinc-800"/>
+        <img src={avatarSrc} alt="Profile Picture" width={300} loading="eager" class="rounded-3xl rotate-3 mx-4 md:mx-0 shadow-xl border-4 border-white dark:border-zinc-800"/>
       </div>
 		</div>
 		<main>
@@ -44,10 +46,10 @@ const posts = (await getCollection('blog')).sort((a: BlogPost, b: BlogPost) => b
         </div>
         <div>
           {
-            posts.map((post: BlogPost) => (
+            posts.map((post: any) => (
               <PostItem post={post} />
             ))
-          }      
+          }
         </div>
         <div class="text-right">
         </div>

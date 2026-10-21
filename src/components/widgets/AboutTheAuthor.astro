@@ -1,5 +1,12 @@
 ---
+import { getProfile, getSettings } from '../../lib/db';
 import Author from '../Author.astro';
+
+const profile = getProfile();
+const settings = getSettings();
+const name = profile.name || settings.site_title;
+const role = profile.role || settings.site_tagline;
+const bioParagraphs = (profile.bio_md || '').split('\n').map((p) => p.trim()).filter(Boolean).slice(0, 2);
 ---
 
 <div
@@ -8,11 +15,12 @@ import Author from '../Author.astro';
 	<h3 class='font-extrabold uppercase mb-4 text-sm'>About the Author</h3>
 	<Author picSize='md' />
 	<div class='author-desc text-[.825rem] my-4'>
-		<p class='mb-3'>
-			Rhytham is an Innovative AI Engineer with 4 years of experience enhancing media products through advanced AI technologies. He specializes in building NLP workflows, RAG pipelines, and multi-modal AI features.
-		</p>
-		<p>He is passionate about automating business insights and streamlining decision-making through generative AI.</p>
+		{
+			bioParagraphs.length > 0 ? (
+				bioParagraphs.map((paragraph: string) => <p class='mb-3'>{paragraph}</p>)
+			) : (
+				<p class='mb-3'>{name} is a {role.toLowerCase()} sharing builds, learnings and notes on AI and software engineering on this blog.</p>
+			)
+		}
 	</div>
 </div>
-
-

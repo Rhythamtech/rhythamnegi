@@ -1,0 +1,40 @@
+---
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import { getSessionFromContext } from '../../lib/session';
+import { getProfile, getSettings, listProjects, mediaUrl } from '../../lib/db';
+import ProjectsView from '@src/components/cms/views/projects-view';
+
+const session = getSessionFromContext(Astro);
+const sidebarDefaultOpen = Astro.cookies.get('sidebar_state')?.value !== 'false';
+const settings = getSettings();
+const profile = getProfile();
+const projects = listProjects();
+
+const iso = (d: Date | null) => (d ? d.toISOString() : null);
+const saved = Astro.url.searchParams.get('saved');
+const notice =
+	saved === '1' ? 'Changes saved.' : saved === 'error' ? 'Saving failed — check the server logs.' : '';
+---
+
+<CmsDoc title='Projects'>
+  <ProjectsView
+    client:load
+    user={session?.username ?? ''}
+    siteTitle={settings.site_title}
+    avatarUrl={mediaUrl(profile.avatar_media_id) || ''}
+    defaultOpen={sidebarDefaultOpen}
+    active='projects'
+    notice={notice}
+    projects={projects.map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      tags: p.tags,
+      status: p.status,
+      date: iso(p.pubDate),
+      coverUrl: p.coverUrl,
+      repoUrl: p.repo_url,
+      demoUrl: p.demo_url
+    }))}
+  />
+</CmsDoc>

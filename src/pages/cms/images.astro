@@ -1,0 +1,69 @@
+---
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import { getSessionFromContext } from '../../lib/session';
+import { getProfile, getSettings, listMedia, mediaUrl } from '../../lib/db';
+import ImagesView from '@src/components/cms/views/images-view';
+
+const session = getSessionFromContext(Astro);
+const sidebarDefaultOpen = Astro.cookies.get('sidebar_state')?.value !== 'false';
+const settings = getSettings();
+const profile = getProfile();
+const media = listMedia();
+
+const saved = Astro.url.searchParams.get('saved');
+const error = Astro.url.searchParams.get('error');
+const nowPostedImageId = Number.parseInt(Astro.url.searchParams.get('id') || '', 10);
+
+const errorMessage = (function resolveMessage() {
+	switch (error) {
+		case 'large':
+			return 'File too large (max 8 MB).';
+		case 'type':
+			return 'Only image files can be uploaded.';
+		case 'empty':
+			return 'No file was provided.';
+		default:
+			return error ? 'Could not process the upload — see server logs.' : '';
+	}
+})();
+
+const savedMessage = (function resolveSavedMessage() {
+	switch (saved) {
+		case 'avatar':
+			return `Image #${nowPostedImageId} is now the profile picture.`;
+		case 'banner':
+			return `Image #${nowPostedImageId} is now the homepage banner.`;
+		case 'upload':
+			return 'Image uploaded.';
+		case 'delete':
+			return 'Image deleted.';
+		default:
+			return '';
+	}
+})();
+
+const notice = savedMessage || errorMessage;
+const isErrorNotice = !savedMessage && Boolean(errorMessage);
+---
+
+<CmsDoc title='Images'>
+  <ImagesView
+    client:load
+    user={session?.username ?? ''}
+    siteTitle={settings.site_title}
+    avatarUrl={mediaUrl(profile.avatar_media_id) || ''}
+    defaultOpen={sidebarDefaultOpen}
+    active='images'
+    notice={notice}
+    isErrorNotice={isErrorNotice}
+    media={media.map((m) => ({
+      id: String(m.id),
+      filename: m.filename,
+      alt: m.alt,
+      mime: m.mime,
+      size: m.size,
+      isAvatar: profile.avatar_media_id === m.id,
+      isBanner: profile.banner_media_id === m.id
+    }))}
+  />
+</CmsDoc>

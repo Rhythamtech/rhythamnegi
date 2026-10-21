@@ -1,25 +1,27 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import PostItem from './PostItem.astro';
 
-type BlogPost = CollectionEntry<'blog'>;
+interface Props {
+	posts: Array<{ id: string; data: { title: string; pubDate: Date; tags?: string[] } }>;
+}
+type PostView = Props['posts'][number];
 const { posts } = Astro.props;
 
-function groupPostsByYear(posts: BlogPost[]) {
+function groupPostsByYear(posts: PostView[]) {
   const grouped = posts.reduce((acc, post) => {
-    const year = post.data.pubDate.getFullYear();
+    const year = new Date(post.data.pubDate).getFullYear();
     if (!acc[year]) {
       acc[year] = [];
     }
     acc[year].push(post);
     return acc;
-  }, {} as Record<number, BlogPost[]>);
+  }, {} as Record<number, PostView[]>);
 
   return Object.entries(grouped)
     .sort(([a], [b]) => Number(b) - Number(a))
     .map(([year, posts]) => ({
       year: Number(year),
-      posts: posts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+      posts: posts.sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()),
     }));
 }
 
@@ -32,7 +34,7 @@ const groupedPosts = groupPostsByYear(posts);
   <div class="mb-8">
     <h2 class="text-2xl font-bold mb-4">{year}</h2>
     <div>
-      {posts.map((post: BlogPost) => (
+      {posts.map((post: PostView) => (
         <PostItem post={post} />
       ))}
     </div>

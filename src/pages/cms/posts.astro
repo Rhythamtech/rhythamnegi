@@ -1,0 +1,38 @@
+---
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import { getSessionFromContext } from '../../lib/session';
+import { getProfile, getSettings, listPosts, mediaUrl } from '../../lib/db';
+import PostsView from '@src/components/cms/views/posts-view';
+
+const session = getSessionFromContext(Astro);
+const sidebarDefaultOpen = Astro.cookies.get('sidebar_state')?.value !== 'false';
+const settings = getSettings();
+const profile = getProfile();
+const posts = listPosts();
+
+const iso = (d: Date | null) => (d ? d.toISOString() : null);
+const saved = Astro.url.searchParams.get('saved');
+const notice =
+	saved === '1' ? 'Changes saved.' : saved === 'error' ? 'Saving failed — check the server logs.' : '';
+---
+
+<CmsDoc title='Posts'>
+  <PostsView
+    client:load
+    user={session?.username ?? ''}
+    siteTitle={settings.site_title}
+    avatarUrl={mediaUrl(profile.avatar_media_id) || ''}
+    defaultOpen={sidebarDefaultOpen}
+    active='posts'
+    notice={notice}
+    posts={posts.map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      tags: p.tags,
+      status: p.status,
+      date: iso(p.pubDate),
+      coverUrl: p.coverUrl
+    }))}
+  />
+</CmsDoc>

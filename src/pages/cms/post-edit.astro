@@ -1,0 +1,53 @@
+---
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import { getSessionFromContext } from '../../lib/session';
+import { getProfile, getPostById, listMedia, mediaUrl, type MediaRow } from '../../lib/db';
+import PostEditorView from '@src/components/cms/views/post-editor-view';
+
+const session = getSessionFromContext(Astro);
+const sidebarDefaultOpen = Astro.cookies.get('sidebar_state')?.value !== 'false';
+const profile = getProfile();
+const idParam = Astro.url.searchParams.get('id') || 'new';
+const isNew = idParam === 'new';
+const saved = Astro.url.searchParams.get('saved');
+const id = isNew ? null : Number.parseInt(idParam, 10);
+const post = id ? getPostById(id) : null;
+
+const mediaList = listMedia();
+const isoDate = (d?: Date | null) => (d ? d.toISOString().slice(0, 10) : '');
+const today = new Date().toISOString().slice(0, 10);
+const notice = saved ? 'Changes saved.' : '';
+---
+
+<CmsDoc title={isNew ? 'New post' : 'Edit post'}>
+  <PostEditorView
+    client:load
+    user={session?.username ?? ''}
+    siteTitle='Devfolio'
+    avatarUrl={mediaUrl(profile.avatar_media_id) || ''}
+    defaultOpen={sidebarDefaultOpen}
+    active='posts'
+    isNew={isNew}
+    notice={notice}
+    today={today}
+    mediaOptions={mediaList.map((m: MediaRow) => ({ id: String(m.id), filename: m.filename }))}
+    post={
+      post
+        ? {
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            status: post.status,
+            description: post.description,
+            seoTitle: post.seo_title ?? '',
+            bodyMd: post.body_md,
+            pubDate: isoDate(post.pubDate),
+            updatedDate: isoDate(post.updatedDate),
+            tags: post.tags.join(', '),
+            coverMediaId: post.cover_media_id ? String(post.cover_media_id) : '',
+            coverUrl: post.coverUrl
+          }
+        : null
+    }
+  />
+</CmsDoc>

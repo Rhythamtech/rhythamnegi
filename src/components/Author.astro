@@ -1,4 +1,5 @@
 ---
+import { getProfile, getSettings, mediaUrl } from '../lib/db';
 import { Image } from 'astro:assets';
 import Ava from '@src/assets/img/pfp.png';
 
@@ -7,11 +8,18 @@ interface Props {
 	picSize: PicSize;
 }
 const { picSize } = Astro.props;
+
+const profile = getProfile();
+const settings = getSettings();
+const githubUrl = settings.github_url;
+const name = profile.name || settings.site_title;
+const role = profile.role || settings.site_tagline;
+const avatarSrc = mediaUrl(profile.avatar_media_id) || Ava.src;
 ---
 
 <div class='flex gap-4 items-center leading-tight not-prose'>
 	<a
-		href='https://github.com/Rhythamtech'
+		href={githubUrl}
 		target='_blank'
 		rel='noopener noreferrer'
 		class:list={[
@@ -21,19 +29,19 @@ const { picSize } = Astro.props;
 			{ 'w-[90px] h-[90px]': picSize === 'lg' }
 		]}
 	>
-		<Image src={Ava} alt='Rhytham Negi' />
+		<img src={avatarSrc} alt={name} />
 	</a>
 	<div>
 		<div>
 			<a
-				href='https://github.com/Rhythamtech'
+				href={githubUrl}
 				class='block font-bold text-inherit hover:text-[var(--link-color)]'
 				target='_blank'
 				rel='noopener noreferrer'
 			>
-				Rhytham Negi
+				{name}
 			</a>
 		</div>
-		<small class='avatar__subtitle'>Innovative AI Engineer</small>
+		<small class='avatar__subtitle'>{role}</small>
 	</div>
 </div>

@@ -1,4 +1,6 @@
 ---
+import { getProfile, getSettings } from '../../lib/db';
+
 interface Props {
 	title: string;
 	description: string;
@@ -9,9 +11,9 @@ interface Props {
 	ogType?: 'website' | 'article';
 }
 
-const { 
-	title, 
-	description, 
+const {
+	title,
+	description,
 	image,
 	articlePublishedTime,
 	articleModifiedTime,
@@ -21,26 +23,30 @@ const {
 const siteUrl = Astro.site ? Astro.site.toString() : 'https://rhythamnegi.com';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
 
+const settings = getSettings();
+const profile = getProfile();
+const personName = profile.name || settings.site_title;
+const jobTitle = profile.role || settings.site_tagline;
+const personImage = (profile.avatar_media_id ? `/media/${profile.avatar_media_id}` : '/favicon.png');
+const sameAs = [settings.github_url, settings.linkedin_url].filter(Boolean);
+
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
-  "name": "Rhytham Negi",
+  "name": personName,
   "url": siteUrl,
-  "image": new URL('/pfp.png', siteUrl).toString(),
-  "sameAs": [
-    "https://github.com/Rhythamtech",
-    "https://linkedin.com/in/rhythamnegi"
-  ],
-  "jobTitle": "Innovative AI Engineer",
-  "description": "Innovative AI Engineer specializing in NLP, RAG, and multi-modal AI."
+  "image": new URL(personImage, siteUrl).toString(),
+  "sameAs": sameAs,
+  "jobTitle": jobTitle,
+  "description": settings.site_description
 };
 
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "Rhytham Negi",
+  "name": personName,
   "url": siteUrl,
-  "description": "Innovative AI Engineer Portfolio & Blog"
+  "description": `${jobTitle} Portfolio & Blog`
 };
 
 const breadcrumbs = [
@@ -76,12 +82,12 @@ if (ogType === 'article') {
     "@type": "BlogPosting",
     "headline": title,
     "description": description,
-    "image": image ? new URL(image, siteUrl).toString() : new URL('/banner.png', siteUrl).toString(),
+    "image": image ? new URL(image, siteUrl).toString() : new URL(personImage, siteUrl).toString(),
     "datePublished": articlePublishedTime,
     "dateModified": articleModifiedTime || articlePublishedTime,
     "author": {
       "@type": "Person",
-      "name": "Rhytham Negi",
+      "name": personName,
       "url": siteUrl
     },
     "mainEntityOfPage": {

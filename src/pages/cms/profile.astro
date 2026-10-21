@@ -1,0 +1,43 @@
+---
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import { getSessionFromContext } from '../../lib/session';
+import { getProfile, getSettings, mediaUrl } from '../../lib/db';
+import ProfileView from '@src/components/cms/views/profile-view';
+import fallbackPfp from '@src/assets/img/pfp.png';
+import fallbackBanner from '@src/assets/img/banner.png';
+
+const session = getSessionFromContext(Astro);
+const sidebarDefaultOpen = Astro.cookies.get('sidebar_state')?.value !== 'false';
+const settings = getSettings();
+const profile = getProfile();
+const saved = Astro.url.searchParams.get('saved');
+const savedError = Astro.url.searchParams.get('error');
+
+const isErrorNotice = Boolean(savedError);
+const notice = saved ? 'Saved. Changes are live on the site.' : savedError ? 'Could not save — see server logs.' : '';
+---
+
+<CmsDoc title='Profile & Site'>
+  <ProfileView
+    client:load
+    user={session?.username ?? ''}
+    siteTitle={settings.site_title}
+    avatarUrl={mediaUrl(profile.avatar_media_id) || ''}
+    defaultOpen={sidebarDefaultOpen}
+    active='profile'
+    notice={notice}
+    isErrorNotice={isErrorNotice}
+    profile={{
+      name: profile.name,
+      role: profile.role,
+      bioMd: profile.bio_md,
+      githubUrl: settings.github_url,
+      linkedinUrl: settings.linkedin_url,
+      siteTitle: settings.site_title,
+      siteTagline: settings.site_tagline,
+      siteDescription: settings.site_description
+    }}
+    avatarSrc={mediaUrl(profile.avatar_media_id) || fallbackPfp.src}
+    bannerSrc={mediaUrl(profile.banner_media_id) || fallbackBanner.src}
+  />
+</CmsDoc>

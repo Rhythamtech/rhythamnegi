@@ -1,7 +1,6 @@
-# Stage 1: Build the application
-FROM node:23-alpine AS builder
+# Stage 1: Build the Astro app (site + CMS)
+FROM node:26-alpine AS builder
 
-# Set the working directory
 WORKDIR /app
 
 # Set NODE_ENV to production for the build process
@@ -11,28 +10,38 @@ ENV NODE_ENV=production
 COPY package*.json ./
 
 # Install dependencies
-# Using 'npm ci' ensures a clean, reproducible install from package-lock.json
-# We include devDependencies because they are required for the Astro build
+# We include devDependencies because they are required for the Astro build (astro check)
 RUN npm ci --include=dev
 
 # Copy the rest of the application source code
 COPY . .
 
-# Build the Astro static site
+# Build the Astro server (SSR via @astrojs/node, standalone mode)
 RUN npm run build
 
-# Stage 2: Serve the static files using Nginx
-FROM nginx:stable-alpine
+# Stage 2: Run the Node server that serves the site and the CMS dashboard
+FROM node:26-alpine
 
-# Copy the build output from the builder stage to the Nginx html directory
-COPY --from=builder /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# Expose port 80 for the web server
-EXPOSE 80
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=4321
 
-# Healthcheck to ensure the container is running correctly
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+# Only runtime dependencies are needed for the standalone server (e.g. sharp)
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Start Nginx in the foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Server bundle + static client assets produced by the Astro build
+COPY --from=builder /app/dist ./dist
+
+# SQLite database lives in /app/data — mount a volume here to persist it
+RUN mkdir -p /app/data
+VOLUME ["/app/data"]
+
+EXPOSE 4321
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
+  CMD wget --quiet --tries=1 --spider http://127.0.0.1:4321/ || exit 1
+
+CMD ["node", "./dist/server/entry.mjs"]

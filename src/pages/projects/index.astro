@@ -1,9 +1,10 @@
 ---
-import { getCollection } from 'astro:content';
+import { listProjects } from '../../lib/db';
+import { projectViews } from '../../lib/views';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectList from '../../components/ProjectList.astro';
 
-const projects = (await getCollection('projects')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const projects = projectViews(listProjects({ publishedOnly: true }));
 ---
 
 <BaseLayout

@@ -1,0 +1,48 @@
+---
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import { getSessionFromContext } from '../../lib/session';
+import {
+	getSettings,
+	getProfile,
+	mediaUrl,
+	listExperience,
+	listSkills,
+	listEducation
+} from '../../lib/db';
+import AboutView from '@src/components/cms/views/about-view';
+
+const session = getSessionFromContext(Astro);
+const sidebarDefaultOpen = Astro.cookies.get('sidebar_state')?.value !== 'false';
+const settings = getSettings();
+const profile = getProfile();
+const experience = listExperience();
+const skills = listSkills();
+const education = listEducation();
+
+const saved = Astro.url.searchParams.get('saved');
+const savedError = Astro.url.searchParams.get('error');
+const isErrorNotice = Boolean(savedError);
+const notice = saved
+	? 'Saved. Changes are live on the site.'
+	: savedError
+		? 'Could not save — see server logs.'
+		: '';
+---
+
+<CmsDoc title='About Page'>
+  <AboutView
+    client:load
+    user={session?.username ?? ''}
+    siteTitle={settings.site_title}
+    avatarUrl={mediaUrl(profile.avatar_media_id) || ''}
+    defaultOpen={sidebarDefaultOpen}
+    active='about'
+    notice={notice}
+    isErrorNotice={isErrorNotice}
+    heroIntro={settings.hero_intro ?? ''}
+    aboutIntro={settings.about_intro ?? ''}
+    experience={experience}
+    skills={skills}
+    education={education}
+  />
+</CmsDoc>
