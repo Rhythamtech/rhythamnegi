@@ -230,6 +230,30 @@ export function listPosts(opts: { publishedOnly?: boolean; tag?: string } = {}):
 	return posts;
 }
 
+/**
+ * All tags currently used in the system, deduped case-insensitively.
+ * Ordered by usage count (most used first), keeping the most common casing.
+ */
+export function listExistingTags(limit = 40): string[] {
+	const rows = getDb()
+		.prepare('SELECT tags FROM posts WHERE tags IS NOT NULL')
+		.all() as Array<{ tags: string }>;
+	const casing = new Map<string, string>(); // lowercase -> first-seen display casing
+	const counts = new Map<string, number>();
+	for (const row of rows) {
+		for (const tag of parseTags(row.tags)) {
+			const key = tag.toLowerCase();
+			if (!key) continue;
+			if (!casing.has(key)) casing.set(key, tag);
+			counts.set(key, (counts.get(key) || 0) + 1);
+		}
+	}
+	return [...counts.entries()]
+		.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+		.slice(0, limit)
+		.map(([key]) => casing.get(key) || key);
+}
+
 export function getPostBySlug(slug: string, publishedOnly = true): Post | null {
 	const sql = publishedOnly
 		? "SELECT * FROM posts WHERE slug = ? AND status = 'published' LIMIT 1"

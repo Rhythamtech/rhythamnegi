@@ -1,0 +1,25 @@
+# Containerized whole stack: Astro SSR site + CMS + AI-assist config.
+#
+#   cp .env.example .env   # fill in CMS_PASSWORD + AI_API_KEY etc.
+#   docker compose up -d --build
+#
+# The SQLite database lives on the host in ./data (persisted, gitignored),
+# so content survives rebuilds. All configuration flows in from `.env`
+# (real env vars always win — see src/lib/env.ts).
+services:
+  app:
+    build: .
+    image: devfolio
+    container_name: devfolio
+    restart: unless-stopped
+    ports:
+      - '4321:4321'
+    env_file:
+      - .env
+    environment:
+      # Non-secret runtime knobs — secrets come from .env
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 4321
+    volumes:
+      - ./data:/app/data

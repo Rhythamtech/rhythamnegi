@@ -6,8 +6,23 @@ dist
 .vscode
 .env
 .env.local
+.env.production
 npm-debug.log
 README.md
 LICENSE
 Dockerfile
+docker-compose.yml
 .dockerignore
+
+# Local runtime data (SQLite db + images) — must not be baked into the image
+data
+# Local experiment folders
+scratch
+.commandcode
+# Alternate lockfile (this project installs with npm, not pnpm)
+pnpm-lock.yaml
+# Stray files
+.DS_Store
+*.md
+theme-classic.html
+theme-layouts.xml
