@@ -1,4 +1,6 @@
 import { getEnv } from './env';
+import { getSetting } from './db';
+import { decryptSecret } from './ai-crypto';
 
 /**
  * Minimal OpenAI-compatible chat completion client (server-side only).
@@ -7,6 +9,10 @@ import { getEnv } from './env';
  * OpenAI, OpenRouter, Ollama, LM Studio, vLLM, etc. Uses plain `fetch`, so no
  * SDK dependency is needed. Credentials never leave the server; the browser
  * only talks to our own `/cms/api/ai/assist` endpoint.
+ *
+ * Configuration is resolved per field: a value saved in the CMS (SQLite
+ * `settings`) wins, otherwise the `.env` value is used. The API key is stored
+ * encrypted — see src/lib/ai-crypto.ts.
  */
 
 export type AiConfig = {
@@ -14,6 +20,23 @@ export type AiConfig = {
 	apiKey: string;
 	model: string;
 };
+
+export type AiConfigSource = 'cms' | 'env';
+
+export type AiConfigStatus = {
+	baseUrl: string;
+	baseUrlSource: AiConfigSource;
+	model: string;
+	modelSource: AiConfigSource;
+	apiKeySource: 'cms' | 'env' | 'none';
+	/** Masked tail of the resolved key — never the full value. */
+	apiKeyHint: string;
+	/** True when a CMS key exists but cannot be decrypted (secret changed). */
+	storedKeyUnreadable: boolean;
+};
+
+const DEFAULT_BASE_URL = 'https://api.openai.com/v1';
+const DEFAULT_MODEL = 'gpt-4o-mini';
 
 export type ChatMessage = {
 	role: 'system' | 'user' | 'assistant';
@@ -29,14 +52,67 @@ export class AiError extends Error {
 	}
 }
 
-export function getAiConfig(): AiConfig | null {
-	const apiKey = getEnv('AI_API_KEY');
-	if (!apiKey) return null;
+function cmsSetting(key: string): string {
+	return (getSetting(key) || '').trim();
+}
+
+function resolveBaseUrl(): { value: string; source: AiConfigSource } {
+	const cms = cmsSetting('ai_base_url');
+	if (cms) return { value: cms.replace(/\/+$/, ''), source: 'cms' };
 	return {
-		baseUrl: getEnv('AI_BASE_URL', 'https://api.openai.com/v1').replace(/\/+$/, ''),
-		apiKey,
-		model: getEnv('AI_MODEL', 'gpt-4o-mini')
+		value: getEnv('AI_BASE_URL', DEFAULT_BASE_URL).trim().replace(/\/+$/, ''),
+		source: 'env'
 	};
+}
+
+function resolveModel(): { value: string; source: AiConfigSource } {
+	const cms = cmsSetting('ai_model');
+	if (cms) return { value: cms, source: 'cms' };
+	return { value: getEnv('AI_MODEL', DEFAULT_MODEL), source: 'env' };
+}
+
+function resolveApiKey(): {
+	value: string | null;
+	source: 'cms' | 'env' | 'none';
+	unreadable: boolean;
+} {
+	const stored = (getSetting('ai_api_key') || '').trim();
+	if (stored) {
+		const decrypted = decryptSecret(stored);
+		if (decrypted) return { value: decrypted, source: 'cms', unreadable: false };
+		const env = getEnv('AI_API_KEY');
+		return { value: env || null, source: env ? 'env' : 'none', unreadable: true };
+	}
+	const env = getEnv('AI_API_KEY');
+	return { value: env || null, source: env ? 'env' : 'none', unreadable: false };
+}
+
+function maskKey(key: string): string {
+	return `••••${key.slice(-4)}`;
+}
+
+/** Effective configuration + where each field came from (for the settings UI). */
+export function getAiConfigStatus(): AiConfigStatus {
+	const baseUrl = resolveBaseUrl();
+	const model = resolveModel();
+	const apiKey = resolveApiKey();
+	return {
+		baseUrl: baseUrl.value,
+		baseUrlSource: baseUrl.source,
+		model: model.value,
+		modelSource: model.source,
+		apiKeySource: apiKey.source,
+		apiKeyHint: apiKey.value ? maskKey(apiKey.value) : '',
+		storedKeyUnreadable: apiKey.unreadable
+	};
+}
+
+export function getAiConfig(): AiConfig | null {
+	const apiKey = resolveApiKey();
+	if (!apiKey.value) return null;
+	const baseUrl = resolveBaseUrl();
+	const model = resolveModel();
+	return { baseUrl: baseUrl.value, apiKey: apiKey.value, model: model.value };
 }
 
 type AiChatOptions = {
@@ -52,7 +128,7 @@ export async function aiChat(
 	const cfg = getAiConfig();
 	if (!cfg) {
 		throw new AiError(
-			'AI assist is not configured — set AI_BASE_URL, AI_API_KEY and AI_MODEL in .env (see .env.example)',
+			'AI assist is not configured — add an API key in CMS → AI Assist (or set AI_API_KEY in .env).',
 			503
 		);
 	}
@@ -82,7 +158,7 @@ export async function aiChat(
 			if (controller.signal.aborted) {
 				throw new AiError('The AI request took too long — please try again.', 504);
 			}
-			throw new AiError('Could not reach the AI provider. Check AI_BASE_URL in .env.', 502);
+			throw new AiError('Could not reach the AI provider. Check the base URL in CMS → AI Assist.', 502);
 		}
 
 		if (!res.ok) {
@@ -94,13 +170,19 @@ export async function aiChat(
 				// Non-JSON error body — fall back to the status code below.
 			}
 			if (res.status === 401 || res.status === 403) {
-				throw new AiError(`AI provider rejected the credentials${hint ? `: ${hint}` : ''}. Check AI_API_KEY.`, 401);
+				throw new AiError(
+					`AI provider rejected the credentials${hint ? `: ${hint}` : ''}. Check the API key in CMS → AI Assist.`,
+					401
+				);
 			}
 			if (res.status === 429) {
 				throw new AiError('AI provider rate limit hit — wait a moment and try again.', 429);
 			}
 			if (res.status === 404) {
-				throw new AiError(`Model "${cfg.model}" not found at AI_BASE_URL. Check AI_MODEL in .env.`, 404);
+				throw new AiError(
+					`Model "${cfg.model}" not found at the configured base URL. Check the model in CMS → AI Assist.`,
+					404
+				);
 			}
 			throw new AiError(hint || `AI provider error (${res.status}).`, res.status);
 		}

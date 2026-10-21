@@ -72,9 +72,20 @@ VPS-critical values:
 | --- | --- |
 | `SITE` | `https://yourdomain.com` (real origin — canonical URLs / og images) |
 | `CADDY_DOMAIN` | `yourdomain.com` (enables automatic Let's Encrypt + renewal) |
-| `CMS_PASSWORD` | strong value — the dashboard is now internet-exposed |
+| `CMS_PASSWORD` | strong value — **bootstrap only**: seeds the account on first boot |
 | `SQLITE_PATH` | leave as `/app/data/cms.db` |
-| `AI_API_KEY` | Groq key, or empty to disable the AI assist |
+| `JWT_SECRET` | optional 32+ random chars; auto-generated in SQLite if empty |
+| `AI_API_KEY` | optional Groq/OpenAI key — usually set in CMS → AI Assist instead |
+| `AI_SECRET` | optional 32+ random chars; encrypts AI keys saved from the CMS |
+
+> The CMS account is created from `CMS_USERNAME`/`CMS_PASSWORD` the first time the database
+> is opened, stored as a salted scrypt hash, and then managed from **CMS → Account**.
+> Changing those variables later has no effect on an existing account.
+>
+> AI provider settings are managed in **CMS → AI Assist** (base URL, model, API key). The key
+> is encrypted with AES-256-GCM before it is written to SQLite and is masked in the UI. Set
+> `AI_SECRET` in production so a stolen database copy alone cannot decrypt it. Changing
+> `AI_SECRET` makes an already-saved key unreadable — re-enter it in the CMS afterwards.
 
 ## 6. Launch
 
@@ -87,6 +98,9 @@ curl -I https://yourdomain.com # expect HTTP/2 200
 
 The CMS dashboard is live at `https://yourdomain.com/cms`.
 
+First login uses the `CMS_USERNAME`/`CMS_PASSWORD` from `.env`; change them immediately under
+**CMS → Account**. Sessions are signed JWTs in an HttpOnly cookie, so no session table is kept.
+
 ## 7. Operations
 
 ```bash
@@ -97,6 +111,9 @@ The CMS dashboard is live at `https://yourdomain.com/cms`.
 # Logs / shell
 docker compose logs -f app
 docker compose exec app sh
+
+# Forgot the CMS password (also works on a local install without Docker)
+docker compose exec app npm run cms:reset-password -- admin 'new-strong-password'
 
 # Backup (posts, projects, settings and images are all in the one DB file)
 docker compose exec app cp /app/data/cms.db /tmp/backup.db

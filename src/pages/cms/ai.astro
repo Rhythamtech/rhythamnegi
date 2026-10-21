@@ -1,0 +1,44 @@
+---
+import CmsDoc from '../../layouts/CmsDoc.astro';
+import { getSessionFromContext } from '../../lib/session';
+import { getProfile, getSettings, mediaUrl } from '../../lib/db';
+import { getAiConfigStatus } from '../../lib/ai';
+import AiView from '@src/components/cms/views/ai-view';
+
+const session = getSessionFromContext(Astro);
+const sidebarDefaultOpen = Astro.cookies.get('sidebar_state')?.value !== 'false';
+const settings = getSettings();
+const profile = getProfile();
+const status = getAiConfigStatus();
+
+const saved = Astro.url.searchParams.get('saved');
+const error = Astro.url.searchParams.get('error') || '';
+
+const errorMessages: Record<string, string> = {
+	base_url:
+		'Base URL must be a valid http(s) URL. Plain http is only allowed for localhost or LAN addresses (Ollama / LM Studio).',
+	model: 'The model name is too long.',
+	key: 'That API key is too long.'
+};
+
+const notice =
+	saved === '1'
+		? 'AI settings saved.'
+		: error
+			? errorMessages[error] || 'Could not save the AI settings.'
+			: '';
+---
+
+<CmsDoc title='AI Assist'>
+  <AiView
+    client:load
+    user={session?.username ?? ''}
+    siteTitle={settings.site_title}
+    avatarUrl={mediaUrl(profile.avatar_media_id) || ''}
+    defaultOpen={sidebarDefaultOpen}
+    active='ai'
+    notice={notice}
+    isErrorNotice={Boolean(error)}
+    status={status}
+  />
+</CmsDoc>

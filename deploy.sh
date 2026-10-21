@@ -337,6 +337,13 @@ if [ "$remote_env_exists" -eq 0 ] || [ "$RECREATE_ENV" -eq 1 ]; then
 	set_key "$TMP_ENV" CADDY_DOMAIN "$DOMAIN"
 	set_key "$TMP_ENV" SQLITE_PATH "/app/data/cms.db"
 
+	# Long-lived secrets on first provisioning only: regenerating them would
+	# sign everyone out and make AI keys saved from the CMS unreadable.
+	if [ "$remote_env_exists" -eq 0 ]; then
+		set_key "$TMP_ENV" JWT_SECRET "$(random_password)$(random_password)"
+		set_key "$TMP_ENV" AI_SECRET "$(random_password)$(random_password)"
+	fi
+
 	if [ -n "$CMS_PASSWORD_OVERRIDE" ]; then
 		set_key "$TMP_ENV" CMS_PASSWORD "$CMS_PASSWORD_OVERRIDE"
 	elif is_weak_password "$(get_key "$TMP_ENV" CMS_PASSWORD)"; then
